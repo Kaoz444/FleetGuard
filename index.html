@@ -209,6 +209,12 @@
             background: #ccc;
             cursor: not-allowed;
         }
+        [data-lang] {
+            display: none;
+        }
+        [data-lang].active {
+            display: inline;
+        }
     </style>
 </head>
 <body>
@@ -413,14 +419,16 @@
             if (languageToggleBtn) {
                 languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
             }
-
+        
+            // Mostrar solo el texto del idioma seleccionado
             document.querySelectorAll('[data-lang]').forEach(el => {
-                const translation = el.querySelector(`span[data-lang="${currentLanguage}"]`);
-                if (translation) {
-                    el.textContent = translation.textContent;
+                el.classList.remove('active');
+                if (el.getAttribute('data-lang') === currentLanguage) {
+                    el.classList.add('active');
                 }
             });
         }
+        
 
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
