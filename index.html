@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -148,6 +150,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text-color-dark);
+        }
+        body.dark-theme .record-item {
+            background: #2d2d2d;
+            color: #ffffff;
         }
 
         .theme-toggle {
