@@ -3,9 +3,8 @@
 <head>
     <title>FleetGuard - Inspeccion de Vehiculos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
     <style>
         :root {
@@ -209,7 +208,7 @@
     </button>
 
     <!-- Theme Toggle -->
-    <button class="theme-toggle" onclick="toggleTheme()">THEME</button>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
 
     <!-- Login Screen -->
     <div id="loginScreen" class="screen container">
@@ -514,22 +513,23 @@
         }
 
         function downloadPDF(index) {
+            const { jsPDF } = window.jspdf;  // Acceso correcto a la librería jsPDF
             const record = records[index];
             const doc = new jsPDF();
-
+        
             doc.setFontSize(16);
             doc.text('Inspection Report', 20, 20);
             doc.setFontSize(12);
             doc.text(`Worker: ${record.worker}`, 20, 40);
             doc.text(`Truck ID: ${record.truckId}`, 20, 50);
             doc.text(`Date: ${record.date}`, 20, 60);
-
+        
             let y = 80;
             for (const [key, value] of Object.entries(record.data)) {
                 doc.text(`${key}: ${value}`, 20, y);
                 y += 10;
             }
-
+        
             doc.save(`inspection_${record.truckId}.pdf`);
         }
 
