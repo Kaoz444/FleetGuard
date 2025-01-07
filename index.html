@@ -501,6 +501,13 @@
             }
         }
 
+        function updateProgressBar() {
+            const progress = ((currentIndex + 1) / inspectionItems.length) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+            progressBar.style.left = '0';
+        }
+
         function displayRecords() {
             const recordsContainer = document.getElementById('recordsContainer');
             recordsContainer.innerHTML = '';
