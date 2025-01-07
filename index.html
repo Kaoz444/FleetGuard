@@ -246,8 +246,8 @@
         let currentInspectionData = {};
 
         const workers = {
-            'test1': { name: 'Juan Pérez', password: '1234', inspections: [] },
-            'test2': { name: 'Maria Rodriguez', password: 'abcd', inspections: [] }
+            'test1': { id: '001', name: 'Juan Pérez', password: '1234', inspections: [] },
+            'test2': { id: '002', name: 'Maria Rodriguez', password: 'abcd', inspections: [] }
         };
 
         function updateLanguage() {
@@ -292,7 +292,7 @@
             const worker = workers[workerId];
             if (worker && worker.password === password) {
                 currentWorker = worker;
-                document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name}`;
+                document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name} (ID: ${worker.id})`;
                 showScreen('inspectionScreen');
                 resetInspection();
             } else {
@@ -301,7 +301,7 @@
         }
 
         function startDemoMode() {
-            currentWorker = { name: 'Demo User', inspections: [] };
+            currentWorker = { id: '000', name: 'Demo User', inspections: [] };
             showScreen('inspectionScreen');
             resetInspection();
         }
