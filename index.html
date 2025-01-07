@@ -3,20 +3,7 @@
 <head>
     <title>FleetGuard - Inspección de Vehículos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-        function updateButtonLanguage() {
-            document.getElementById('loginBtnText').textContent = currentLanguage === 'en' ? 'Login' : 'Iniciar Sesión';
-            document.getElementById('demoModeBtnText').textContent = currentLanguage === 'en' ? 'Demo Mode' : 'Modo Demostración';
-        }
-        // Call updateButtonLanguage initially and after language toggle
-        document.addEventListener('DOMContentLoaded', updateButtonLanguage);
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem('fleetguard-language', currentLanguage);
-            updateLanguage();
-            updateButtonLanguage(); // Ensure buttons are updated
-        }
-</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* Reset and base styles */
         * {
@@ -68,6 +55,36 @@
     <!-- Previous HTML content remains the same -->
 
     <script>
+    // Function to show specific screen by ID
+    function showScreen(screenId) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.style.display = 'none';
+        });
+
+        // Show the selected screen if it exists
+        const selectedScreen = document.getElementById(screenId);
+        if (selectedScreen) {
+            selectedScreen.style.display = 'block';
+        }
+    }
+
+    // Update language for all elements with data-lang attribute
+    function updateLanguage() {
+        const languageToggleBtn = document.getElementById('languageToggleBtn');
+        if (languageToggleBtn) {
+            languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+        }
+
+        document.querySelectorAll('[data-lang]').forEach(el => {
+            const key = el.getAttribute('data-lang');
+            const langElement = el.querySelector(`span[data-lang="${currentLanguage}"]`);
+            if (langElement) {
+                el.textContent = langElement.textContent;
+            }
+        });
+    }
+    
         // Multilanguage Support
         const translations = {
             en: {
@@ -385,20 +402,7 @@
         });
 
         // Rest of the previous script remains the same...
-    
-        function updateButtonLanguage() {
-            document.getElementById('loginBtnText').textContent = currentLanguage === 'en' ? 'Login' : 'Iniciar Sesión';
-            document.getElementById('demoModeBtnText').textContent = currentLanguage === 'en' ? 'Demo Mode' : 'Modo Demostración';
-        }
-        // Call updateButtonLanguage initially and after language toggle
-        document.addEventListener('DOMContentLoaded', updateButtonLanguage);
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem('fleetguard-language', currentLanguage);
-            updateLanguage();
-            updateButtonLanguage(); // Ensure buttons are updated
-        }
-</script>
+    </script>
 </body>
 </html>
 <!DOCTYPE html>
@@ -406,34 +410,8 @@
 <head>
     <title>FleetGuard - Inspección de Vehículos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-        function updateButtonLanguage() {
-            document.getElementById('loginBtnText').textContent = currentLanguage === 'en' ? 'Login' : 'Iniciar Sesión';
-            document.getElementById('demoModeBtnText').textContent = currentLanguage === 'en' ? 'Demo Mode' : 'Modo Demostración';
-        }
-        // Call updateButtonLanguage initially and after language toggle
-        document.addEventListener('DOMContentLoaded', updateButtonLanguage);
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem('fleetguard-language', currentLanguage);
-            updateLanguage();
-            updateButtonLanguage(); // Ensure buttons are updated
-        }
-</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js">
-        function updateButtonLanguage() {
-            document.getElementById('loginBtnText').textContent = currentLanguage === 'en' ? 'Login' : 'Iniciar Sesión';
-            document.getElementById('demoModeBtnText').textContent = currentLanguage === 'en' ? 'Demo Mode' : 'Modo Demostración';
-        }
-        // Call updateButtonLanguage initially and after language toggle
-        document.addEventListener('DOMContentLoaded', updateButtonLanguage);
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem('fleetguard-language', currentLanguage);
-            updateLanguage();
-            updateButtonLanguage(); // Ensure buttons are updated
-        }
-</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -664,20 +642,7 @@
                 if (e.key === 'Enter') login();
             });
         });
-    
-        function updateButtonLanguage() {
-            document.getElementById('loginBtnText').textContent = currentLanguage === 'en' ? 'Login' : 'Iniciar Sesión';
-            document.getElementById('demoModeBtnText').textContent = currentLanguage === 'en' ? 'Demo Mode' : 'Modo Demostración';
-        }
-        // Call updateButtonLanguage initially and after language toggle
-        document.addEventListener('DOMContentLoaded', updateButtonLanguage);
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem('fleetguard-language', currentLanguage);
-            updateLanguage();
-            updateButtonLanguage(); // Ensure buttons are updated
-        }
-</script>
+    </script>
 </body>
 </html>
         
@@ -859,10 +824,12 @@
                 <input type="password" id="workerPassword" placeholder="Password / Contraseña">
             </div>
             <button class="btn" onclick="login()">
-                <span id="loginBtnText"></span>
+                <span data-lang="en">Login</span>
+                <span data-lang="es">Iniciar Sesión</span>
             </button>
             <button class="btn btn-secondary" onclick="startDemoMode()">
-                <span id="demoModeBtnText"></span>
+                <span data-lang="en">Demo Mode</span>
+                <span data-lang="es">Modo Demostración</span>
             </button>
         </div>
     </div>
@@ -927,6 +894,36 @@
     </div>
 
     <script>
+    // Function to show specific screen by ID
+    function showScreen(screenId) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.style.display = 'none';
+        });
+
+        // Show the selected screen if it exists
+        const selectedScreen = document.getElementById(screenId);
+        if (selectedScreen) {
+            selectedScreen.style.display = 'block';
+        }
+    }
+
+    // Update language for all elements with data-lang attribute
+    function updateLanguage() {
+        const languageToggleBtn = document.getElementById('languageToggleBtn');
+        if (languageToggleBtn) {
+            languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+        }
+
+        document.querySelectorAll('[data-lang]').forEach(el => {
+            const key = el.getAttribute('data-lang');
+            const langElement = el.querySelector(`span[data-lang="${currentLanguage}"]`);
+            if (langElement) {
+                el.textContent = langElement.textContent;
+            }
+        });
+    }
+    
         // Multilanguage Support
         const translations = {
             en: {
