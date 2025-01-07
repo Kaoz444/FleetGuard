@@ -320,57 +320,84 @@
         const inspectionItems = [
             { 
                 id: 'windshield', 
-                name: 'Windshield', 
-                icon: '*',
-                description: 'Must be clean, without cracks, chips, or stains that could obstruct the drivers view.'
+                name: { en: 'Windshield', es: 'Parabrisas' }, 
+                icon: '🪟',
+                description: { 
+                    en: 'Must be clean, without cracks, chips, or stains that could obstruct the driver\'s view.', 
+                    es: 'Debe estar limpio, sin grietas, astillas o manchas que puedan obstruir la vista del conductor.' 
+                }
             },
             { 
                 id: 'side_mirrors', 
-                name: 'Side Mirrors', 
-                icon: '*',
-                description: 'Ensure they are properly aligned, free from cracks, and firmly attached.'
+                name: { en: 'Side Mirrors', es: 'Espejos Laterales' }, 
+                icon: '🪞',
+                description: { 
+                    en: 'Ensure they are properly aligned, free from cracks, and firmly attached.', 
+                    es: 'Asegúrese de que estén correctamente alineados, sin grietas y firmemente sujetos.' 
+                }
             },
             { 
                 id: 'headlights', 
-                name: 'Headlights', 
-                icon: '*',
-                description: 'Should be clear, intact, and free from moisture inside the casing.'
+                name: { en: 'Headlights', es: 'Faros' }, 
+                icon: '💡',
+                description: { 
+                    en: 'Should be clear, intact, and free from moisture inside the casing.', 
+                    es: 'Deben estar claros, intactos y libres de humedad en el interior de la carcasa.' 
+                }
             },
             { 
                 id: 'turn_signals', 
-                name: 'Turn Signals', 
-                icon: '*',
-                description: 'Check for proper operation and ensure the lenses are not broken or missing.'
+                name: { en: 'Turn Signals', es: 'Direccionales' }, 
+                icon: '🔀',
+                description: { 
+                    en: 'Check for proper operation and ensure the lenses are not broken or missing.', 
+                    es: 'Verifique el correcto funcionamiento y asegúrese de que las lentes no estén rotas o faltantes.' 
+                }
             },
             { 
                 id: 'tires', 
-                name: 'Tires', 
-                icon: '*',
-                description: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.'
+                name: { en: 'Tires', es: 'Llantas' }, 
+                icon: '🚗',
+                description: { 
+                    en: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.', 
+                    es: 'Inspeccione que estén correctamente infladas, sin cortes visibles, abultamientos o desgaste excesivo de la banda de rodadura.' 
+                }
             },
             { 
                 id: 'rims', 
-                name: 'Rims', 
-                icon: '*',
-                description: 'Ensure they are free of cracks, dents, or deformations.'
+                name: { en: 'Rims', es: 'Rines' }, 
+                icon: '⚙️',
+                description: { 
+                    en: 'Ensure they are free of cracks, dents, or deformations.', 
+                    es: 'Asegúrese de que estén libres de grietas, abolladuras o deformaciones.' 
+                }
             },
             { 
                 id: 'wipers', 
-                name: 'Wipers', 
-                icon: '*',
-                description: 'Blades should be in good condition, without cracks or excessive wear.'
+                name: { en: 'Wipers', es: 'Limpiaparabrisas' }, 
+                icon: '🌧️',
+                description: { 
+                    en: 'Blades should be in good condition, without cracks or excessive wear.', 
+                    es: 'Las escobillas deben estar en buen estado, sin grietas ni desgaste excesivo.' 
+                }
             },
             { 
                 id: 'brake_lights', 
-                name: 'Brake Lights', 
-                icon: '*',
-                description: 'Confirm they are functional and that the lenses are clean and free from cracks.'
+                name: { en: 'Brake Lights', es: 'Luces de Freno' }, 
+                icon: '🚦',
+                description: { 
+                    en: 'Confirm they are functional and that the lenses are clean and free from cracks.', 
+                    es: 'Confirme que estén funcionales y que las lentes estén limpias y libres de grietas.' 
+                }
             },
             { 
                 id: 'reflectors', 
-                name: 'Reflectors', 
-                icon: '*',
-                description: 'Must be present, clean, and not faded or broken.'
+                name: { en: 'Reflectors', es: 'Reflectores' }, 
+                icon: '🔴',
+                description: { 
+                    en: 'Must be present, clean, and not faded or broken.', 
+                    es: 'Deben estar presentes, limpios y no descoloridos ni rotos.' 
+                }
             }
         ];
 
@@ -404,7 +431,8 @@
         function toggleLanguage() {
             currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
             updateLanguage();
-            updateDynamicText(); // Llamada adicional para actualizar textos dinámicos
+            updateDynamicText();
+            updateInspectionDisplay(); // Actualizar la pantalla de inspección
         }
 
         function showScreen(screenId) {
@@ -463,8 +491,8 @@
 
         function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
-            document.getElementById('currentName').textContent = `${item.icon} ${item.name}`;
-            document.getElementById('currentDescription').textContent = item.description || 'No description available.';
+            document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
+            document.getElementById('currentDescription').textContent = item.description[currentLanguage];
             document.getElementById('commentBox').value = '';
             document.getElementById('charCount').textContent = '0/30';
             document.getElementById('nextButton').classList.add('disabled');
