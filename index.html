@@ -511,26 +511,49 @@
             });
         }
         function downloadPDF(index) {
-            const { jsPDF } = window.jspdf;  // Acceso correcto al objeto jsPDF
+            const { jsPDF } = window.jspdf;
             const record = records[index];
             const doc = new jsPDF();
-        
+            
+            const marginLeft = 20;
+            const marginTop = 20;
+            const lineHeight = 10;
+            const pageWidth = doc.internal.pageSize.getWidth() - marginLeft * 2;
+            
             doc.setFontSize(16);
-            doc.text('Inspection Report', 20, 20);
+            doc.text('Inspection Report', marginLeft, marginTop);
             doc.setFontSize(12);
-            doc.text(`Worker: ${record.worker}`, 20, 40);
-            doc.text(`Truck ID: ${record.truckId}`, 20, 50);
-            doc.text(`Date: ${record.date}`, 20, 60);
         
-            let y = 80;
+            let y = marginTop + 20;
+            const textLines = [
+                `Worker: ${record.worker}`,
+                `Truck ID: ${record.truckId}`,
+                `Date: ${record.date}`
+            ];
+            
+            textLines.forEach(line => {
+                doc.text(line, marginLeft, y);
+                y += lineHeight;
+            });
+        
+            y += lineHeight;  // Espacio adicional antes de los datos de inspección
+        
             for (const [key, value] of Object.entries(record.data)) {
-                doc.text(`${key}: ${value}`, 20, y);
-                y += 10;
+                const lines = doc.splitTextToSize(`${key}: ${value}`, pageWidth);
+                lines.forEach(line => {
+                    if (y + lineHeight > doc.internal.pageSize.getHeight() - marginTop) {
+                        doc.addPage();
+                        y = marginTop;
+                    }
+                    doc.text(line, marginLeft, y);
+                    y += lineHeight;
+                });
             }
         
             const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
             doc.save(`inspection_${record.truckId}_${timestamp}.pdf`);
         }
+
 
         document.addEventListener('DOMContentLoaded', () => {
     try {
