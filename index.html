@@ -55,10 +55,18 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 0%;
             height: 6px;
             background: var(--primary-color);
             transition: width 0.5s ease;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
 
         .title {
@@ -150,6 +158,7 @@
             align-items: center;
             color: var(--text-color-dark);
         }
+
         body.dark-theme .record-item {
             background: #2d2d2d;
             color: #ffffff;
@@ -248,7 +257,9 @@
     <!-- Inspection Screen -->
     <div id="inspectionScreen" class="screen container">
         <div class="card">
-            <div class="progress-bar" id="progressBar"></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
             <div id="currentName" class="title"></div>
             <div id="currentDescription"></div>
             <div class="comment-box">
@@ -418,12 +429,13 @@
             showScreen('truckIdScreen');
         }
 
-         function startInspection() {
+        function startInspection() {
             const truckId = document.getElementById('truckId').value.trim();
             if (truckId) {
                 alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
                 resetInspection();
                 updateInspectionDisplay();
+                updateProgressBar();
                 showScreen('inspectionScreen');
             } else {
                 alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
@@ -443,6 +455,11 @@
             document.getElementById('charCount').textContent = '0/30';
             document.getElementById('nextButton').classList.add('disabled');
             document.getElementById('nextButton').disabled = true;
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentIndex + 1) / inspectionItems.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
         }
 
         document.getElementById('commentBox').addEventListener('input', function () {
