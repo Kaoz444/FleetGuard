@@ -491,12 +491,29 @@
 
         function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
+            
+            // Guardar el texto actual de la caja de comentarios
+            const currentText = document.getElementById('commentBox').value;
+        
+            // Actualizar el nombre y la descripción en el idioma actual
             document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
             document.getElementById('currentDescription').textContent = item.description[currentLanguage];
-            document.getElementById('commentBox').value = '';
-            document.getElementById('charCount').textContent = '0/30';
-            document.getElementById('nextButton').classList.add('disabled');
-            document.getElementById('nextButton').disabled = true;
+        
+            // Restaurar el texto previamente guardado
+            document.getElementById('commentBox').value = currentText;
+        
+            // Actualizar el contador de caracteres
+            const charCount = currentText.length;
+            document.getElementById('charCount').textContent = `${charCount}/30`;
+        
+            // Deshabilitar o habilitar el botón "Next" según el conteo de caracteres
+            if (charCount >= 30) {
+                document.getElementById('nextButton').classList.remove('disabled');
+                document.getElementById('nextButton').disabled = false;
+            } else {
+                document.getElementById('nextButton').classList.add('disabled');
+                document.getElementById('nextButton').disabled = true;
+            }
         }
 
         function updateProgressBar() {
