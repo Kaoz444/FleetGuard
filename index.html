@@ -200,6 +200,23 @@
         </div>
     </div>
 
+    <!-- Truck ID Screen -->
+    <div id="truckIdScreen" class="screen container">
+        <div class="card">
+            <h2 class="title">
+                <span data-lang="en">Enter Truck ID</span>
+                <span data-lang="es">Ingrese ID del Camión</span>
+            </h2>
+            <div class="input-group">
+                <input type="text" id="truckId" placeholder="Truck ID / ID del Camión">
+            </div>
+            <button class="btn" onclick="startInspection()">
+                <span data-lang="en">Start Inspection</span>
+                <span data-lang="es">Iniciar Inspección</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Inspection Screen -->
     <div id="inspectionScreen" class="screen container">
         <div class="card">
@@ -250,6 +267,12 @@
             'test2': { id: '002', name: 'Maria Rodriguez', password: 'abcd', inspections: [] }
         };
 
+        const trucks = {
+            '1001': { model: 'Volvo FH16', year: 2021 },
+            '1002': { model: 'Scania R450', year: 2020 },
+            '1003': { model: 'Kenworth T680', year: 2019 }
+        };
+
         function updateLanguage() {
             const languageToggleBtn = document.getElementById('languageToggleBtn');
             if (languageToggleBtn) {
@@ -293,8 +316,7 @@
             if (worker && worker.password === password) {
                 currentWorker = worker;
                 document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name} (ID: ${worker.id})`;
-                showScreen('inspectionScreen');
-                resetInspection();
+                showScreen('truckIdScreen');
             } else {
                 alert(translations[currentLanguage].invalidWorker);
             }
@@ -302,8 +324,18 @@
 
         function startDemoMode() {
             currentWorker = { id: '000', name: 'Demo User', inspections: [] };
-            showScreen('inspectionScreen');
-            resetInspection();
+            showScreen('truckIdScreen');
+        }
+
+        function startInspection() {
+            const truckId = document.getElementById('truckId').value.trim();
+            if (trucks[truckId]) {
+                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${trucks[truckId].model} (${trucks[truckId].year})`);
+                showScreen('inspectionScreen');
+                resetInspection();
+            } else {
+                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
+            }
         }
 
         function resetInspection() {
