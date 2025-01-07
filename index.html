@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>FleetGuard - Inspección de Vehículos</title>
+    <title>FleetGuard - Inspecci贸n de Veh铆culos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
@@ -198,11 +198,11 @@
 <body>
     <!-- Language Toggle -->
     <button class="language-toggle" onclick="toggleLanguage()">
-        <span id="languageToggleBtn">🇺🇸 EN</span>
+        <span id="languageToggleBtn">馃嚭馃嚫 EN</span>
     </button>
 
     <!-- Theme Toggle -->
-    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+    <button class="theme-toggle" onclick="toggleTheme()">馃寭</button>
 
     <!-- Login Screen -->
     <div id="loginScreen" class="screen container">
@@ -210,15 +210,15 @@
             <h1 class="title">FleetGuard</h1>
             <div class="input-group">
                 <input type="text" id="workerId" placeholder="Worker ID / ID de Trabajador">
-                <input type="password" id="workerPassword" placeholder="Password / Contraseña">
+                <input type="password" id="workerPassword" placeholder="Password / Contrase帽a">
             </div>
             <button class="btn" onclick="login()">
                 <span data-lang="en">Login</span>
-                <span data-lang="es">Iniciar Sesión</span>
+                <span data-lang="es">Iniciar Sesi贸n</span>
             </button>
             <button class="btn btn-secondary" onclick="startDemoMode()">
                 <span data-lang="en">Demo Mode</span>
-                <span data-lang="es">Modo Demostración</span>
+                <span data-lang="es">Modo Demostraci贸n</span>
             </button>
         </div>
     </div>
@@ -228,14 +228,14 @@
         <div class="card">
             <h2 class="title">
                 <span data-lang="en">Enter Truck ID</span>
-                <span data-lang="es">Ingrese ID del Camión</span>
+                <span data-lang="es">Ingrese ID del Cami贸n</span>
             </h2>
             <div class="input-group">
-                <input type="text" id="truckId" placeholder="Truck ID / ID del Camión">
+                <input type="text" id="truckId" placeholder="Truck ID / ID del Cami贸n">
             </div>
             <button class="btn" onclick="startInspection()">
                 <span data-lang="en">Start Inspection</span>
-                <span data-lang="es">Iniciar Inspección</span>
+                <span data-lang="es">Iniciar Inspecci贸n</span>
             </button>
         </div>
     </div>
@@ -263,6 +263,18 @@
         </div>
     </div>
 
+    <!-- Records Screen -->
+    <div id="recordsScreen" class="screen container">
+        <div class="card">
+            <h2 class="title">Inspection Records</h2>
+            <div id="recordsContainer" class="records-list"></div>
+            <button class="btn btn-secondary" onclick="showScreen('truckIdScreen')">
+                <span data-lang="en">Back to Inspection</span>
+                <span data-lang="es">Volver a Inspecci贸n</span>
+            </button>
+        </div>
+    </div>
+
     <script>
         const translations = {
             en: {
@@ -273,10 +285,10 @@
                 welcome: 'Welcome'
             },
             es: {
-                invalidWorker: 'ID de trabajador o contraseña inválidos',
-                mustCompleteInspection: 'Por favor complete todos los campos de inspección',
+                invalidWorker: 'ID de trabajador o contrase帽a inv谩lidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspecci贸n',
                 downloadError: 'Error al generar el reporte',
-                noRecords: 'Aún no hay registros de inspección',
+                noRecords: 'A煤n no hay registros de inspecci贸n',
                 welcome: 'Bienvenido'
             }
         };
@@ -291,73 +303,76 @@
             { 
                 id: 'bus_id', 
                 name: 'Bus Identification', 
-                icon: '🚌', 
+                icon: '馃殞', 
                 isInput: true
             },
             { 
                 id: 'windshield', 
                 name: 'Windshield', 
-                icon: '🪟',
-                description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver\'s view.'
+                icon: '馃獰',
+                description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver's view.'
             },
             { 
                 id: 'side_mirrors', 
                 name: 'Side Mirrors', 
-                icon: '🪞',
+                icon: '馃獮',
                 description: 'Ensure they are properly aligned, free from cracks, and firmly attached.'
             },
             { 
                 id: 'headlights', 
                 name: 'Headlights', 
-                icon: '💡',
+                icon: '馃挕',
                 description: 'Should be clear, intact, and free from moisture inside the casing.'
             },
             { 
                 id: 'turn_signals', 
                 name: 'Turn Signals', 
-                icon: '↔️',
+                icon: '鈫旓笍',
                 description: 'Check for proper operation and ensure the lenses are not broken or missing.'
             },
             { 
                 id: 'tires', 
                 name: 'Tires', 
-                icon: '🛞',
+                icon: '馃洖',
                 description: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.'
             },
             { 
                 id: 'rims', 
                 name: 'Rims', 
-                icon: '🔧',
+                icon: '馃敡',
                 description: 'Ensure they are free of cracks, dents, or deformations.'
             },
             { 
                 id: 'wipers', 
                 name: 'Wipers', 
-                icon: '↔️',
+                icon: '鈫旓笍',
                 description: 'Blades should be in good condition, without cracks or excessive wear.'
             },
             { 
                 id: 'brake_lights', 
                 name: 'Brake Lights', 
-                icon: '🔴',
+                icon: '馃敶',
                 description: 'Confirm they are functional and that the lenses are clean and free from cracks.'
             },
             { 
                 id: 'reflectors', 
                 name: 'Reflectors', 
-                icon: '⭐',
+                icon: '猸?,
                 description: 'Must be present, clean, and not faded or broken.'
             }
         ];
 
         const workers = {
-            '1234': { id: '003', name: 'Worker 1234', password: '1234', inspections: [] }
+            '1234': { id: '003', name: 'Worker 1234', password: '1234', inspections: [] },
+            'admin': { id: '001', name: 'Admin User', password: 'admin', inspections: [] }
         };
+
+        const records = [];
 
         function updateLanguage() {
             const languageToggleBtn = document.getElementById('languageToggleBtn');
             if (languageToggleBtn) {
-                languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+                languageToggleBtn.textContent = currentLanguage === 'en' ? '馃嚥馃嚱 ES' : '馃嚭馃嚫 EN';
             }
 
             document.querySelectorAll('[data-lang]').forEach(el => {
@@ -407,12 +422,12 @@
         function startInspection() {
             const truckId = document.getElementById('truckId').value.trim();
             if (truckId) {
-                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
+                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Cami贸n seleccionado:'} ${truckId}`);
                 resetInspection();
                 updateInspectionDisplay();
                 showScreen('inspectionScreen');
             } else {
-                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
+                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Cami贸n inv谩lido');
             }
         }
 
@@ -444,12 +459,20 @@
         });
 
         function nextItem() {
+            currentInspectionData[inspectionItems[currentIndex].id] = document.getElementById('commentBox').value;
             if (currentIndex < inspectionItems.length - 1) {
                 currentIndex++;
                 updateInspectionDisplay();
             } else {
-                alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
-                showScreen('truckIdScreen');
+                alert(currentLanguage === 'en' ? 'Inspection completed!' : '隆Inspecci贸n completada!');
+                records.push({
+                    worker: currentWorker.name,
+                    truckId: document.getElementById('truckId').value.trim(),
+                    date: new Date().toLocaleString(),
+                    data: { ...currentInspectionData }
+                });
+                showScreen('recordsScreen');
+                displayRecords();
             }
         }
 
@@ -458,6 +481,49 @@
                 currentIndex--;
                 updateInspectionDisplay();
             }
+        }
+
+        function displayRecords() {
+            const recordsContainer = document.getElementById('recordsContainer');
+            recordsContainer.innerHTML = '';
+
+            if (records.length === 0) {
+                recordsContainer.innerHTML = `<p>${translations[currentLanguage].noRecords}</p>`;
+                return;
+            }
+
+            records.forEach((record, index) => {
+                const recordItem = document.createElement('div');
+                recordItem.className = 'record-item';
+                recordItem.innerHTML = `
+                    <div>
+                        <p><strong>${record.worker}</strong></p>
+                        <p>${record.truckId} - ${record.date}</p>
+                    </div>
+                    <button class="btn" onclick="downloadPDF(${index})">PDF</button>
+                `;
+                recordsContainer.appendChild(recordItem);
+            });
+        }
+
+        function downloadPDF(index) {
+            const record = records[index];
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text('Inspection Report', 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Worker: ${record.worker}`, 20, 40);
+            doc.text(`Truck ID: ${record.truckId}`, 20, 50);
+            doc.text(`Date: ${record.date}`, 20, 60);
+
+            let y = 80;
+            for (const [key, value] of Object.entries(record.data)) {
+                doc.text(`${key}: ${value}`, 20, y);
+                y += 10;
+            }
+
+            doc.save(`inspection_${record.truckId}.pdf`);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
