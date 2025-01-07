@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,18 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <style>
-        :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #10b981;
-            --background-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-            --card-background: white;
-            --text-color: #333;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-        }
-
-        /* General styles */
+        /* Reset and base styles */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -46,11 +34,44 @@
         .card {
             background: var(--card-background);
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             padding: 30px;
             text-align: center;
             position: relative;
             overflow: hidden;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 6px;
+            background: var(--primary-color);
+            transition: width 0.5s ease;
+        }
+
+        .title {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary-color);
         }
 
         .btn {
@@ -74,6 +95,23 @@
             background: var(--secondary-color);
         }
 
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
         .theme-toggle {
             position: absolute;
             top: 15px;
@@ -94,51 +132,171 @@
             --card-background: #1f2937;
             --text-color: #f3f4f6;
         }
-
-        .dark-theme .theme-toggle {
-            color: #60a5fa;
-            border-color: #60a5fa;
-        }
     </style>
 </head>
 <body>
+    <!-- Language Toggle -->
+    <button class="language-toggle" onclick="toggleLanguage()">
+        <span id="languageToggleBtn">🇺🇸 EN</span>
+    </button>
+
     <!-- Theme Toggle -->
     <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
 
     <!-- Login Screen -->
-    <div id="loginScreen" class="container">
+    <div id="loginScreen" class="screen container">
         <div class="card">
             <h1 class="title">FleetGuard</h1>
             <div class="input-group">
                 <input type="text" id="workerId" placeholder="Worker ID / ID de Trabajador">
                 <input type="password" id="workerPassword" placeholder="Password / Contraseña">
             </div>
-            <button class="btn" onclick="login()">Login / Iniciar Sesión</button>
-            <button class="btn btn-secondary" onclick="startDemoMode()">Demo Mode / Modo Demostración</button>
+            <button class="btn" onclick="login()">
+                <span data-lang="en">Login</span>
+                <span data-lang="es">Iniciar Sesión</span>
+            </button>
+            <button class="btn btn-secondary" onclick="startDemoMode()">
+                <span data-lang="en">Demo Mode</span>
+                <span data-lang="es">Modo Demostración</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Inspection Screen -->
+    <div id="inspectionScreen" class="screen container">
+        <div class="card">
+            <div class="progress-bar" id="progressBar"></div>
+            <div id="workerName" class="title"></div>
+            <div class="status-icon" id="currentIcon"></div>
+            <div id="currentName" class="title"></div>
+            <div id="inputContainer"></div>
+            <div class="nav-buttons">
+                <button class="btn" onclick="previousItem()" id="prevButton">
+                    <span data-lang="en">Previous</span>
+                    <span data-lang="es">Anterior</span>
+                </button>
+                <button class="btn" onclick="nextItem()" id="nextButton">
+                    <span data-lang="en">Next</span>
+                    <span data-lang="es">Siguiente</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Records Screen -->
+    <div id="recordsScreen" class="screen container">
+        <div class="card">
+            <h2 class="title">
+                <span data-lang="en">Inspection History</span>
+                <span data-lang="es">Historial de Inspecciones</span>
+            </h2>
+            <div id="recordsList" class="records-list"></div>
+            <div class="nav-buttons">
+                <button class="btn" onclick="startNew()">
+                    <span data-lang="en">New Inspection</span>
+                    <span data-lang="es">Nueva Inspección</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Signature Modal -->
+    <div id="signatureModal" class="screen container">
+        <div class="card">
+            <h2 class="title">
+                <span data-lang="en">Digital Signature</span>
+                <span data-lang="es">Firma Digital</span>
+            </h2>
+            <canvas id="signatureCanvas" width="400" height="200" style="border: 2px solid #ddd;"></canvas>
+            <div class="nav-buttons">
+                <button class="btn" onclick="clearSignature()">
+                    <span data-lang="en">Clear</span>
+                    <span data-lang="es">Limpiar</span>
+                </button>
+                <button class="btn btn-secondary" onclick="saveSignature()">
+                    <span data-lang="en">Save</span>
+                    <span data-lang="es">Guardar</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        let currentTheme = localStorage.getItem('fleetguard-theme') || 'light';
+        const translations = {
+            en: {
+                invalidWorker: 'Invalid Worker ID or Password',
+                mustCompleteInspection: 'Please complete all inspection fields',
+                downloadError: 'Error generating report',
+                noRecords: 'No inspection records yet',
+                welcome: 'Welcome'
+            },
+            es: {
+                invalidWorker: 'ID de trabajador o contraseña inválidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspección',
+                downloadError: 'Error al generar el reporte',
+                noRecords: 'Aún no hay registros de inspección',
+                welcome: 'Bienvenido'
+            }
+        };
+
+        let currentLanguage = 'es';
+        let currentTheme = 'light';
+
+        const workers = {
+            '1234': { name: 'Juan Pérez', password: 'fleetguard2024', inspections: [] },
+            '5678': { name: 'Maria Rodriguez', password: 'guardaflota2024', inspections: [] }
+        };
+
+        const inspectionItems = [
+            { id: 'bus_id', name: 'Vehicle Identification / Identificación del Vehículo', icon: '🚌', isInput: true },
+            { id: 'windshield', name: 'Windshield / Parabrisas', icon: '🪟' }
+        ];
 
         function toggleTheme() {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
             document.body.classList.toggle('dark-theme');
+            currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
             localStorage.setItem('fleetguard-theme', currentTheme);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (currentTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-            }
-        });
-
-        function login() {
-            alert('Login functionality here.');
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            updateLanguage();
         }
 
-        function startDemoMode() {
-            alert('Demo mode started.');
+        function updateLanguage() {
+            const languageToggleBtn = document.getElementById('languageToggleBtn');
+            languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                el.textContent = el.querySelector(`span[data-lang="${currentLanguage}"]`).textContent;
+            });
+        }
+
+        function login() {
+            const workerId = document.getElementById('workerId').value.trim();
+            const password = document.getElementById('workerPassword').value;
+
+            const worker = workers[workerId];
+            if (worker && worker.password === password) {
+                currentWorker = worker;
+                document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name}`;
+                showScreen('inspectionScreen');
+                resetInspection();
+            } else {
+                alert(translations[currentLanguage].invalidWorker);
+            }
+        }
+
+        function resetInspection() {
+            currentIndex = 0;
+            currentInspectionData = {};
+            updateInspectionDisplay();
+        }
+
+        function showScreen(screenId) {
+            ['loginScreen', 'inspectionScreen', 'recordsScreen', 'signatureModal'].forEach(id => {
+                document.getElementById(id).style.display = id === screenId ? 'block' : 'none';
+            });
         }
     </script>
 </body>
