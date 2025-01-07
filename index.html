@@ -12,6 +12,16 @@
             --background-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
             --card-background: white;
             --text-color: #333;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
         }
 
         body {
@@ -26,6 +36,7 @@
         }
 
         .container {
+            width: 100%;
             max-width: 450px;
             padding: 20px;
         }
@@ -33,8 +44,21 @@
         .card {
             background: var(--card-background);
             border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             padding: 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 6px;
+            background: var(--primary-color);
+            transition: width 0.5s ease;
         }
 
         .title {
@@ -43,14 +67,25 @@
             margin-bottom: 20px;
         }
 
-        .input-group input, textarea {
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input, textarea, select {
             width: 100%;
             padding: 12px;
-            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary-color);
         }
 
         .btn {
+            display: block;
             width: 100%;
             padding: 12px;
             background: var(--primary-color);
@@ -58,107 +93,350 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .language-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        #loginScreen {
+            display: block;
+        }
+
+        .records-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .record-item {
+            background: #f4f4f4;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --primary-color: #60a5fa;
+            --secondary-color: #34d399;
+            --background-gradient: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            --card-background: #1f2937;
+            --text-color: #f3f4f6;
+        }
+
+        .comment-box {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .comment-box textarea {
+            width: 100%;
+            height: 80px;
+            resize: none;
+        }
+
+        .comment-box span {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--text-color);
         }
 
         .disabled {
             background: #ccc;
             cursor: not-allowed;
         }
-
-        .comment-box textarea {
-            height: 80px;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-        }
     </style>
 </head>
 <body>
+    <!-- Language Toggle -->
+    <button class="language-toggle" onclick="toggleLanguage()">
+        <span id="languageToggleBtn">🇺🇸 EN</span>
+    </button>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+
     <!-- Login Screen -->
     <div id="loginScreen" class="screen container">
         <div class="card">
             <h1 class="title">FleetGuard</h1>
             <div class="input-group">
-                <input type="text" id="workerId" placeholder="Worker ID">
-                <input type="password" id="workerPassword" placeholder="Password">
+                <input type="text" id="workerId" placeholder="Worker ID / ID de Trabajador">
+                <input type="password" id="workerPassword" placeholder="Password / Contraseña">
             </div>
-            <button class="btn" onclick="login()">Login</button>
+            <button class="btn" onclick="login()">
+                <span data-lang="en">Login</span>
+                <span data-lang="es">Iniciar Sesión</span>
+            </button>
+            <button class="btn btn-secondary" onclick="startDemoMode()">
+                <span data-lang="en">Demo Mode</span>
+                <span data-lang="es">Modo Demostración</span>
+            </button>
         </div>
     </div>
 
     <!-- Truck ID Screen -->
-    <div id="truckIdScreen" class="screen container" style="display:none;">
+    <div id="truckIdScreen" class="screen container">
         <div class="card">
-            <h2 class="title">Enter Truck ID</h2>
+            <h2 class="title">
+                <span data-lang="en">Enter Truck ID</span>
+                <span data-lang="es">Ingrese ID del Camión</span>
+            </h2>
             <div class="input-group">
-                <input type="text" id="truckId" placeholder="Truck ID">
+                <input type="text" id="truckId" placeholder="Truck ID / ID del Camión">
             </div>
-            <button class="btn" onclick="startInspection()">Start Inspection</button>
+            <button class="btn" onclick="startInspection()">
+                <span data-lang="en">Start Inspection</span>
+                <span data-lang="es">Iniciar Inspección</span>
+            </button>
         </div>
     </div>
 
     <!-- Inspection Screen -->
-    <div id="inspectionScreen" class="screen container" style="display:none;">
+    <div id="inspectionScreen" class="screen container">
         <div class="card">
+            <div class="progress-bar" id="progressBar"></div>
             <div id="currentName" class="title"></div>
             <div id="currentDescription"></div>
             <div class="comment-box">
-                <textarea id="commentBox" placeholder="Add comments..."></textarea>
+                <textarea id="commentBox" placeholder="Add comments... / Agrega comentarios..."></textarea>
                 <span id="charCount">0/30</span>
             </div>
             <div class="nav-buttons">
-                <button class="btn" id="prevButton" onclick="previousItem()">Previous</button>
-                <button class="btn disabled" id="nextButton" onclick="nextItem()" disabled>Next</button>
+                <button class="btn" onclick="previousItem()" id="prevButton">
+                    <span data-lang="en">Previous</span>
+                    <span data-lang="es">Anterior</span>
+                </button>
+                <button class="btn disabled" onclick="nextItem()" id="nextButton" disabled>
+                    <span data-lang="en">Next</span>
+                    <span data-lang="es">Siguiente</span>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
+        const translations = {
+            en: {
+                invalidWorker: 'Invalid Worker ID or Password',
+                mustCompleteInspection: 'Please complete all inspection fields',
+                downloadError: 'Error generating report',
+                noRecords: 'No inspection records yet',
+                welcome: 'Welcome'
+            },
+            es: {
+                invalidWorker: 'ID de trabajador o contraseña inválidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspección',
+                downloadError: 'Error al generar el reporte',
+                noRecords: 'Aún no hay registros de inspección',
+                welcome: 'Bienvenido'
+            }
+        };
+
+        let currentLanguage = 'es';
+        let currentTheme = 'light';
+        let currentWorker = null;
+        let currentIndex = 0;
+        let currentInspectionData = {};
+
+        const inspectionItems = [
+    { 
+        id: 'bus_id', 
+        name: 'Bus Identification', 
+        icon: '🚌', 
+        isInput: true
+    },
+    { 
+        id: 'windshield', 
+        name: 'Windshield', 
+        icon: '🪟',
+        description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver\'s view.'
+    },
+    { 
+        id: 'side_mirrors', 
+        name: 'Side Mirrors', 
+        icon: '🪞',
+        description: 'Ensure they are properly aligned, free from cracks, and firmly attached.'
+    },
+    { 
+        id: 'headlights', 
+        name: 'Headlights', 
+        icon: '💡',
+        description: 'Should be clear, intact, and free from moisture inside the casing.'
+    },
+    { 
+        id: 'turn_signals', 
+        name: 'Turn Signals', 
+        icon: '↔️',
+        description: 'Check for proper operation and ensure the lenses are not broken or missing.'
+    },
+    { 
+        id: 'tires', 
+        name: 'Tires', 
+        icon: '🛞',
+        description: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.'
+    },
+    { 
+        id: 'rims', 
+        name: 'Rims', 
+        icon: '🔧',
+        description: 'Ensure they are free of cracks, dents, or deformations.'
+    },
+    { 
+        id: 'wipers', 
+        name: 'Wipers', 
+        icon: '↔️',
+        description: 'Blades should be in good condition, without cracks or excessive wear.'
+    },
+    { 
+        id: 'brake_lights', 
+        name: 'Brake Lights', 
+        icon: '🔴',
+        description: 'Confirm they are functional and that the lenses are clean and free from cracks.'
+    },
+    { 
+        id: 'reflectors', 
+        name: 'Reflectors', 
+        icon: '⭐',
+        description: 'Must be present, clean, and not faded or broken.'
+    }
+];
+
         const workers = {
-            '1234': { id: '003', name: 'Worker 1234', password: '1234' }
+            'test1': { id: '001', name: 'Juan Pérez', password: '1234', inspections: [] },
+            'test2': { id: '002', name: 'Maria Rodriguez', password: 'abcd', inspections: [] },
+            '1234': { id: '003', name: 'Worker 1234', password: '1234', inspections: [] }
         };
 
         const trucks = {
             '1001': { model: 'Volvo FH16', year: 2021 },
-            '1002': { model: 'Scania R450', year: 2020 }
+            '1002': { model: 'Scania R450', year: 2020 },
+            '1003': { model: 'Kenworth T680', year: 2019 }
         };
 
-        const inspectionItems = [
-            { id: 'bus_id', name: 'Bus Identification', icon: '🚌', isInput: true },
-            { id: 'windshield', name: 'Windshield', icon: '🪟', description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver\'s view.' },
-            { id: 'side_mirrors', name: 'Side Mirrors', icon: '🪞', description: 'Ensure they are properly aligned, free from cracks, and firmly attached.' },
-            { id: 'headlights', name: 'Headlights', icon: '💡', description: 'Should be clear, intact, and free from moisture inside the casing.' }
-        ];
+        function updateLanguage() {
+            const languageToggleBtn = document.getElementById('languageToggleBtn');
+            if (languageToggleBtn) {
+                languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+            }
 
-        let currentIndex = 0;
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const translation = el.querySelector(`span[data-lang="${currentLanguage}"]`);
+                if (translation) {
+                    el.textContent = translation.textContent;
+                }
+            });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            localStorage.setItem('fleetguard-theme', currentTheme);
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            updateLanguage();
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            const selectedScreen = document.getElementById(screenId);
+            if (selectedScreen) {
+                selectedScreen.style.display = 'block';
+            }
+        }
 
         function login() {
             const workerId = document.getElementById('workerId').value.trim();
-            const password = document.getElementById('workerPassword').value.trim();
+            const password = document.getElementById('workerPassword').value;
 
-            if (workers[workerId] && workers[workerId].password === password) {
+            const worker = workers[workerId];
+            if (worker && worker.password === password) {
+                currentWorker = worker;
+                document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name} (ID: ${worker.id})`;
                 showScreen('truckIdScreen');
             } else {
-                alert('Invalid Worker ID or Password');
+                alert(translations[currentLanguage].invalidWorker);
             }
+        }
+
+        function startDemoMode() {
+            currentWorker = { id: '000', name: 'Demo User', inspections: [] };
+            showScreen('truckIdScreen');
         }
 
         function startInspection() {
             const truckId = document.getElementById('truckId').value.trim();
             if (trucks[truckId]) {
-                showScreen('inspectionScreen');
+                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${trucks[truckId].model} (${trucks[truckId].year})`);
+                resetInspection();
                 updateInspectionDisplay();
+                showScreen('inspectionScreen');
             } else {
-                alert('Invalid Truck ID');
+                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
             }
         }
 
+        function resetInspection() {
+            currentIndex = 0;
+            currentInspectionData = {};
+        }
+
         function updateInspectionDisplay() {
-            const item = inspectionItems[currentIndex];
-            document.getElementById('currentName').textContent = `${item.icon} ${item.name}`;
-            document.getElementById('currentDescription').textContent = item.description || 'No description available.';
+            const currentItem = inspectionItems[currentIndex];
+            document.getElementById('currentName').textContent = currentItem.name;
+            document.getElementById('currentDescription').textContent = currentItem.description;
             document.getElementById('commentBox').value = '';
             document.getElementById('charCount').textContent = '0/30';
             document.getElementById('nextButton').classList.add('disabled');
@@ -177,12 +455,18 @@
             }
         });
 
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLanguage();
+            toggleTheme();
+        });
+
         function nextItem() {
             if (currentIndex < inspectionItems.length - 1) {
                 currentIndex++;
                 updateInspectionDisplay();
             } else {
-                alert('Inspection completed!');
+                alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
+                showScreen('truckIdScreen');
             }
         }
 
@@ -191,13 +475,6 @@
                 currentIndex--;
                 updateInspectionDisplay();
             }
-        }
-
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.style.display = 'none';
-            });
-            document.getElementById(screenId).style.display = 'block';
         }
     </script>
 </body>
