@@ -446,11 +446,6 @@
             document.getElementById('workerId').placeholder = currentLanguage === 'en' ? 'Worker ID' : 'ID de Trabajador';
             document.getElementById('workerPassword').placeholder = currentLanguage === 'en' ? 'Password' : 'Contraseña';
             document.getElementById('truckId').placeholder = currentLanguage === 'en' ? 'Truck ID' : 'ID del Camión';
-        
-            // Actualizar alertas dinámicas
-            if (currentWorker) {
-                alert(`${translations[currentLanguage].welcome}, ${currentWorker.name}!`);
-            }
         }
         
         function login() {
