@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>FleetGuard - Inspecci贸n de Veh铆culos</title>
+    <title>FleetGuard - Inspeccion de Vehiculos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
@@ -198,11 +198,11 @@
 <body>
     <!-- Language Toggle -->
     <button class="language-toggle" onclick="toggleLanguage()">
-        <span id="languageToggleBtn">馃嚭馃嚫 EN</span>
+        <span id="languageToggleBtn">ES EN</span>
     </button>
 
     <!-- Theme Toggle -->
-    <button class="theme-toggle" onclick="toggleTheme()">馃寭</button>
+    <button class="theme-toggle" onclick="toggleTheme()">THEME</button>
 
     <!-- Login Screen -->
     <div id="loginScreen" class="screen container">
@@ -210,15 +210,15 @@
             <h1 class="title">FleetGuard</h1>
             <div class="input-group">
                 <input type="text" id="workerId" placeholder="Worker ID / ID de Trabajador">
-                <input type="password" id="workerPassword" placeholder="Password / Contrase帽a">
+                <input type="password" id="workerPassword" placeholder="Password / Contrasena">
             </div>
             <button class="btn" onclick="login()">
                 <span data-lang="en">Login</span>
-                <span data-lang="es">Iniciar Sesi贸n</span>
+                <span data-lang="es">Iniciar Sesion</span>
             </button>
             <button class="btn btn-secondary" onclick="startDemoMode()">
                 <span data-lang="en">Demo Mode</span>
-                <span data-lang="es">Modo Demostraci贸n</span>
+                <span data-lang="es">Modo Demostracion</span>
             </button>
         </div>
     </div>
@@ -228,14 +228,14 @@
         <div class="card">
             <h2 class="title">
                 <span data-lang="en">Enter Truck ID</span>
-                <span data-lang="es">Ingrese ID del Cami贸n</span>
+                <span data-lang="es">Ingrese ID del Camion</span>
             </h2>
             <div class="input-group">
-                <input type="text" id="truckId" placeholder="Truck ID / ID del Cami贸n">
+                <input type="text" id="truckId" placeholder="Truck ID / ID del Camion">
             </div>
             <button class="btn" onclick="startInspection()">
                 <span data-lang="en">Start Inspection</span>
-                <span data-lang="es">Iniciar Inspecci贸n</span>
+                <span data-lang="es">Iniciar Inspeccion</span>
             </button>
         </div>
     </div>
@@ -270,7 +270,7 @@
             <div id="recordsContainer" class="records-list"></div>
             <button class="btn btn-secondary" onclick="showScreen('truckIdScreen')">
                 <span data-lang="en">Back to Inspection</span>
-                <span data-lang="es">Volver a Inspecci贸n</span>
+                <span data-lang="es">Volver a Inspeccion</span>
             </button>
         </div>
     </div>
@@ -285,10 +285,10 @@
                 welcome: 'Welcome'
             },
             es: {
-                invalidWorker: 'ID de trabajador o contrase帽a inv谩lidos',
-                mustCompleteInspection: 'Por favor complete todos los campos de inspecci贸n',
+                invalidWorker: 'ID de trabajador o contrasena invalidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspeccion',
                 downloadError: 'Error al generar el reporte',
-                noRecords: 'A煤n no hay registros de inspecci贸n',
+                noRecords: 'A煤n no hay registros de inspeccion',
                 welcome: 'Bienvenido'
             }
         };
@@ -303,61 +303,61 @@
             { 
                 id: 'bus_id', 
                 name: 'Bus Identification', 
-                icon: '馃殞', 
+                icon: '*', 
                 isInput: true
             },
             { 
                 id: 'windshield', 
                 name: 'Windshield', 
-                icon: '馃獰',
+                icon: '*',
                 description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver's view.'
             },
             { 
                 id: 'side_mirrors', 
                 name: 'Side Mirrors', 
-                icon: '馃獮',
+                icon: '*',
                 description: 'Ensure they are properly aligned, free from cracks, and firmly attached.'
             },
             { 
                 id: 'headlights', 
                 name: 'Headlights', 
-                icon: '馃挕',
+                icon: '*',
                 description: 'Should be clear, intact, and free from moisture inside the casing.'
             },
             { 
                 id: 'turn_signals', 
                 name: 'Turn Signals', 
-                icon: '鈫旓笍',
+                icon: '*',
                 description: 'Check for proper operation and ensure the lenses are not broken or missing.'
             },
             { 
                 id: 'tires', 
                 name: 'Tires', 
-                icon: '馃洖',
+                icon: '*',
                 description: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.'
             },
             { 
                 id: 'rims', 
                 name: 'Rims', 
-                icon: '馃敡',
+                icon: '*',
                 description: 'Ensure they are free of cracks, dents, or deformations.'
             },
             { 
                 id: 'wipers', 
                 name: 'Wipers', 
-                icon: '鈫旓笍',
+                icon: '*',
                 description: 'Blades should be in good condition, without cracks or excessive wear.'
             },
             { 
                 id: 'brake_lights', 
                 name: 'Brake Lights', 
-                icon: '馃敶',
+                icon: '*',
                 description: 'Confirm they are functional and that the lenses are clean and free from cracks.'
             },
             { 
                 id: 'reflectors', 
                 name: 'Reflectors', 
-                icon: '猸?,
+                icon: '*',
                 description: 'Must be present, clean, and not faded or broken.'
             }
         ];
