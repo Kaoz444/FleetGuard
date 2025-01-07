@@ -288,78 +288,70 @@
         let currentInspectionData = {};
 
         const inspectionItems = [
-    { 
-        id: 'bus_id', 
-        name: 'Bus Identification', 
-        icon: '🚌', 
-        isInput: true
-    },
-    { 
-        id: 'windshield', 
-        name: 'Windshield', 
-        icon: '🪟',
-        description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver\'s view.'
-    },
-    { 
-        id: 'side_mirrors', 
-        name: 'Side Mirrors', 
-        icon: '🪞',
-        description: 'Ensure they are properly aligned, free from cracks, and firmly attached.'
-    },
-    { 
-        id: 'headlights', 
-        name: 'Headlights', 
-        icon: '💡',
-        description: 'Should be clear, intact, and free from moisture inside the casing.'
-    },
-    { 
-        id: 'turn_signals', 
-        name: 'Turn Signals', 
-        icon: '↔️',
-        description: 'Check for proper operation and ensure the lenses are not broken or missing.'
-    },
-    { 
-        id: 'tires', 
-        name: 'Tires', 
-        icon: '🛞',
-        description: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.'
-    },
-    { 
-        id: 'rims', 
-        name: 'Rims', 
-        icon: '🔧',
-        description: 'Ensure they are free of cracks, dents, or deformations.'
-    },
-    { 
-        id: 'wipers', 
-        name: 'Wipers', 
-        icon: '↔️',
-        description: 'Blades should be in good condition, without cracks or excessive wear.'
-    },
-    { 
-        id: 'brake_lights', 
-        name: 'Brake Lights', 
-        icon: '🔴',
-        description: 'Confirm they are functional and that the lenses are clean and free from cracks.'
-    },
-    { 
-        id: 'reflectors', 
-        name: 'Reflectors', 
-        icon: '⭐',
-        description: 'Must be present, clean, and not faded or broken.'
-    }
-];
+            { 
+                id: 'bus_id', 
+                name: 'Bus Identification', 
+                icon: '🚌', 
+                isInput: true
+            },
+            { 
+                id: 'windshield', 
+                name: 'Windshield', 
+                icon: '🪟',
+                description: 'Must be clean, without cracks, chips, or stains that could obstruct the driver\'s view.'
+            },
+            { 
+                id: 'side_mirrors', 
+                name: 'Side Mirrors', 
+                icon: '🪞',
+                description: 'Ensure they are properly aligned, free from cracks, and firmly attached.'
+            },
+            { 
+                id: 'headlights', 
+                name: 'Headlights', 
+                icon: '💡',
+                description: 'Should be clear, intact, and free from moisture inside the casing.'
+            },
+            { 
+                id: 'turn_signals', 
+                name: 'Turn Signals', 
+                icon: '↔️',
+                description: 'Check for proper operation and ensure the lenses are not broken or missing.'
+            },
+            { 
+                id: 'tires', 
+                name: 'Tires', 
+                icon: '🛞',
+                description: 'Inspect for proper inflation, no visible cuts, bulges, or excessive tread wear.'
+            },
+            { 
+                id: 'rims', 
+                name: 'Rims', 
+                icon: '🔧',
+                description: 'Ensure they are free of cracks, dents, or deformations.'
+            },
+            { 
+                id: 'wipers', 
+                name: 'Wipers', 
+                icon: '↔️',
+                description: 'Blades should be in good condition, without cracks or excessive wear.'
+            },
+            { 
+                id: 'brake_lights', 
+                name: 'Brake Lights', 
+                icon: '🔴',
+                description: 'Confirm they are functional and that the lenses are clean and free from cracks.'
+            },
+            { 
+                id: 'reflectors', 
+                name: 'Reflectors', 
+                icon: '⭐',
+                description: 'Must be present, clean, and not faded or broken.'
+            }
+        ];
 
         const workers = {
-            'test1': { id: '001', name: 'Juan Pérez', password: '1234', inspections: [] },
-            'test2': { id: '002', name: 'Maria Rodriguez', password: 'abcd', inspections: [] },
             '1234': { id: '003', name: 'Worker 1234', password: '1234', inspections: [] }
-        };
-
-        const trucks = {
-            '1001': { model: 'Volvo FH16', year: 2021 },
-            '1002': { model: 'Scania R450', year: 2020 },
-            '1003': { model: 'Kenworth T680', year: 2019 }
         };
 
         function updateLanguage() {
@@ -391,20 +383,16 @@
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.style.display = 'none';
             });
-            const selectedScreen = document.getElementById(screenId);
-            if (selectedScreen) {
-                selectedScreen.style.display = 'block';
-            }
+            document.getElementById(screenId).style.display = 'block';
         }
 
         function login() {
             const workerId = document.getElementById('workerId').value.trim();
-            const password = document.getElementById('workerPassword').value;
+            const password = document.getElementById('workerPassword').value.trim();
 
-            const worker = workers[workerId];
-            if (worker && worker.password === password) {
-                currentWorker = worker;
-                document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name} (ID: ${worker.id})`;
+            if (workers[workerId] && workers[workerId].password === password) {
+                currentWorker = workers[workerId];
+                alert(`${translations[currentLanguage].welcome}, ${currentWorker.name}!`);
                 showScreen('truckIdScreen');
             } else {
                 alert(translations[currentLanguage].invalidWorker);
@@ -418,8 +406,8 @@
 
         function startInspection() {
             const truckId = document.getElementById('truckId').value.trim();
-            if (trucks[truckId]) {
-                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${trucks[truckId].model} (${trucks[truckId].year})`);
+            if (truckId) {
+                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
                 resetInspection();
                 updateInspectionDisplay();
                 showScreen('inspectionScreen');
@@ -434,9 +422,9 @@
         }
 
         function updateInspectionDisplay() {
-            const currentItem = inspectionItems[currentIndex];
-            document.getElementById('currentName').textContent = currentItem.name;
-            document.getElementById('currentDescription').textContent = currentItem.description;
+            const item = inspectionItems[currentIndex];
+            document.getElementById('currentName').textContent = `${item.icon} ${item.name}`;
+            document.getElementById('currentDescription').textContent = item.description || 'No description available.';
             document.getElementById('commentBox').value = '';
             document.getElementById('charCount').textContent = '0/30';
             document.getElementById('nextButton').classList.add('disabled');
@@ -455,11 +443,6 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateLanguage();
-            toggleTheme();
-        });
-
         function nextItem() {
             if (currentIndex < inspectionItems.length - 1) {
                 currentIndex++;
@@ -476,6 +459,11 @@
                 updateInspectionDisplay();
             }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLanguage();
+            toggleTheme();
+        });
     </script>
 </body>
 </html>
