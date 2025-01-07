@@ -294,7 +294,7 @@
                 invalidWorker: 'ID de trabajador o contrasena invalidos',
                 mustCompleteInspection: 'Por favor complete todos los campos de inspeccion',
                 downloadError: 'Error al generar el reporte',
-                noRecords: 'A煤n no hay registros de inspeccion',
+                noRecords: 'Aun no hay registros de inspeccion',
                 welcome: 'Bienvenido'
             }
         };
@@ -513,24 +513,24 @@
         }
 
         function downloadPDF(index) {
-            const { jsPDF } = window.jspdf;  // Acceso correcto a la librería jsPDF
             const record = records[index];
             const doc = new jsPDF();
-        
+
             doc.setFontSize(16);
             doc.text('Inspection Report', 20, 20);
             doc.setFontSize(12);
             doc.text(`Worker: ${record.worker}`, 20, 40);
             doc.text(`Truck ID: ${record.truckId}`, 20, 50);
             doc.text(`Date: ${record.date}`, 20, 60);
-        
+
             let y = 80;
             for (const [key, value] of Object.entries(record.data)) {
                 doc.text(`${key}: ${value}`, 20, y);
                 y += 10;
             }
-        
-            doc.save(`inspection_${record.truckId}.pdf`);
+
+            const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
+       doc.save(`inspection_${record.truckId}_${timestamp}.pdf`);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
