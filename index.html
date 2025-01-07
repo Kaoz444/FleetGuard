@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>FleetGuard - Inspección de Vehículos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive adjustments */
+        @media screen and (max-width: 480px) {
+            input, textarea, button {
+                padding: 8px !important;
+                font-size: 14px !important;
+            }
+
+            .container {
+                padding: 10px !important;
+            }
+        }
+
+        /* Theme variables */
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --background-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            --card-background: white;
+            --text-color: #333;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Rest of the CSS remains the same */
+    </style>
+</head>
+<body>
+    <!-- Previous HTML content remains the same -->
+
+    <script>
+        // Multilanguage Support
+        const translations = {
+            en: {
+                invalidWorker: 'Invalid Worker ID or Password',
+                mustCompleteInspection: 'Please complete all inspection fields',
+                downloadError: 'Error generating report',
+                noRecords: 'No inspection records yet',
+                vehicleIdPlaceholder: 'Enter Vehicle ID (4 digits)',
+                observationsPlaceholder: 'Enter your observations (minimum 30 characters)',
+                clearSignatureConfirm: 'Are you sure you want to clear the signature?',
+                welcome: 'Welcome'
+            },
+            es: {
+                invalidWorker: 'ID de trabajador o contraseña inválidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspección',
+                downloadError: 'Error al generar el reporte',
+                noRecords: 'Aún no hay registros de inspección',
+                vehicleIdPlaceholder: 'Ingrese ID del Vehículo (4 dígitos)',
+                observationsPlaceholder: 'Ingrese sus observaciones (mínimo 30 caracteres)',
+                clearSignatureConfirm: '¿Está seguro que desea borrar la firma?',
+                welcome: 'Bienvenido'
+            }
+        };
+
+        // Detect browser language
+        function detectLanguage() {
+            const browserLang = navigator.language.split('-')[0];
+            return ['en', 'es'].includes(browserLang) ? browserLang : 'es';
+        }
+
+        let currentLanguage = localStorage.getItem('fleetguard-language') || detectLanguage();
+        let currentTheme = localStorage.getItem('fleetguard-theme') || 'light';
+
+        // Workers Database (simulated)
+        const workers = {
+            '1234': { 
+                name: 'Juan Pérez', 
+                password: 'fleetguard2024',
+                inspections: [] 
+            },
+            '5678': { 
+                name: 'Maria Rodriguez', 
+                password: 'guardaflota2024',
+                inspections: [] 
+            },
+            'demo': {
+                name: 'Demo User',
+                password: 'demo2024',
+                inspections: []
+            }
+        };
+
+        // Inspection Configuration
+        const inspectionItems = [
+            { 
+                id: 'bus_id', 
+                name: 'Vehicle Identification / Identificación del Vehículo', 
+                icon: '🚌', 
+                isInput: true,
+                validation: (value) => /^\d{4}$/.test(value),
+                validationMessage: {
+                    en: 'Must be a 4-digit vehicle ID',
+                    es: 'Debe ser un ID de vehículo de 4 dígitos'
+                }
+            },
+            { 
+                id: 'windshield', 
+                name: 'Windshield / Parabrisas', 
+                icon: '🪟',
+                description: {
+                    en: 'Must be clean, without cracks, chips, or stains obstructing driver\'s view.',
+                    es: 'Debe estar limpio, sin grietas, astillas ni manchas que obstruyan la vista del conductor.'
+                }
+            }
+            // ... other inspection items
+        ];
+
+        // Shared state and utility functions
+        let currentIndex = 0;
+        let currentWorker = null;
+        let currentInspectionData = {};
+
+        // Auto-save inspection progress
+        function saveInspectionProgress() {
+            if (currentWorker) {
+                localStorage.setItem(`fleetguard-inspection-${currentWorker.name}`, 
+                    JSON.stringify({
+                        data: currentInspectionData,
+                        currentIndex: currentIndex
+                    })
+                );
+            }
+        }
+
+        // Load saved inspection progress
+        function loadSavedInspection() {
+            if (currentWorker) {
+                const savedInspection = localStorage.getItem(`fleetguard-inspection-${currentWorker.name}`);
+                if (savedInspection) {
+                    const { data, currentIndex: savedIndex } = JSON.parse(savedInspection);
+                    currentInspectionData = data;
+                    currentIndex = savedIndex;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Save current input 
+        function saveCurrentInput() {
+            const currentInput = document.getElementById('currentInput');
+            if (currentInput) {
+                currentInspectionData[inspectionItems[currentIndex].id] = currentInput.value;
+                saveInspectionProgress();
+            }
+        }
+
+        // Theme and Language Management
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('fleetguard-theme', currentTheme);
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            localStorage.setItem('fleetguard-language', currentLanguage);
+            updateLanguage();
+            
+            // Refresh current screen's language-dependent elements
+            if (document.getElementById('inspectionScreen').style.display === 'block') {
+                updateInspectionDisplay();
+            }
+        }
+
+        function updateLanguage() {
+            const languageToggleBtn = document.getElementById('languageToggleBtn');
+            languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.getAttribute('data-lang');
+                el.textContent = el.querySelector(`span[data-lang="${currentLanguage}"]`).textContent;
+            });
+        }
+
+        // Login Process with Demo Mode
+        function startDemoMode() {
+            currentWorker = workers['demo'];
+            showScreen('inspectionScreen');
+            resetInspection();
+        }
+
+        function login() {
+            const workerId = document.getElementById('workerId').value.trim();
+            const password = document.getElementById('workerPassword').value;
+
+            const worker = workers[workerId];
+            if (worker && worker.password === password) {
+                currentWorker = worker;
+                document.getElementById('workerName').textContent = `${translations[currentLanguage].welcome} ${worker.name}`;
+                showScreen('inspectionScreen');
+                
+                // Try to load saved inspection, otherwise reset
+                if (!loadSavedInspection()) {
+                    resetInspection();
+                }
+            } else {
+                alert(translations[currentLanguage].invalidWorker);
+            }
+        }
+
+        // Digital Signature with Touch Support
+        function initSignatureCanvas() {
+            const canvas = document.getElementById('signatureCanvas');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            function startDrawing(e) {
+                isDrawing = true;
+                const pos = getPosition(e);
+                [lastX, lastY] = [pos.x, pos.y];
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                const pos = getPosition(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                [lastX, lastY] = [pos.x, pos.y];
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+            }
+
+            function getPosition(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                // Handle both mouse and touch events
+                const x = e.clientX 
+                    ? (e.clientX - rect.left) * scaleX 
+                    : (e.touches[0].clientX - rect.left) * scaleX;
+                const y = e.clientY 
+                    ? (e.clientY - rect.top) * scaleY 
+                    : (e.touches[0].clientY - rect.top) * scaleY;
+                
+                return { x, y };
+            }
+
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                startDrawing(e);
+            }, { passive: false });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                draw(e);
+            }, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing);
+
+            // Styling for signature canvas
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'black';
+        }
+
+        function clearSignature() {
+            if (confirm(translations[currentLanguage].clearSignatureConfirm)) {
+                const canvas = document.getElementById('signatureCanvas');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function saveSignature() {
+            try {
+                const canvas = document.getElementById('signatureCanvas');
+                const signatureImage = canvas.toDataURL('image/png');
+                generateFinalReport(signatureImage);
+            } catch (error) {
+                console.error('Error saving signature:', error);
+                alert(translations[currentLanguage].downloadError);
+            }
+        }
+
+        // Report Generation with Error Handling
+        function generateFinalReport(signatureImage) {
+            try {
+                const doc = new jsPDF();
+                doc.setFontSize(20);
+                doc.text('FleetGuard Inspection Report', 105, 20, { align: 'center' });
+                
+                // Add inspection details
+                let yOffset = 40;
+                Object.entries(currentInspectionData).forEach(([key, value]) => {
+                    doc.text(`${key}: ${value}`, 20, yOffset);
+                    yOffset += 10;
+                });
+
+                // Add signature if available
+                if (signatureImage) {
+                    doc.addImage(signatureImage, 'PNG', 10, 200, 50, 25);
+                }
+
+                // Save the document
+                doc.save(`FleetGuard_Inspection_${new Date().toISOString().split('T')[0]}.pdf`);
+
+                // Save to worker's inspection history
+                const completedInspection = {
+                    date: new Date().toLocaleString(),
+                    details: currentInspectionData
+                };
+                currentWorker.inspections.push(completedInspection);
+
+                // Clear local storage for this inspection
+                localStorage.removeItem(`fleetguard-inspection-${currentWorker.name}`);
+
+                // Show records screen
+                showScreen('recordsScreen');
+                displayRecords();
+            } catch (error) {
+                console.error('Report generation error:', error);
+                alert(translations[currentLanguage].downloadError);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+
+            // Set initial language
+            updateLanguage();
+
+            // Setup event listeners
+            document.getElementById('workerId').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('workerPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+        });
+
+        // Rest of the previous script remains the same...
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>FleetGuard - Inspección de Vehículos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --background-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            --card-background: white;
+            --text-color: #333;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        // Inspection Management
+        let currentIndex = 0;
+        let currentWorker = null;
+        let currentInspectionData = {};
+
+        function resetInspection() {
+            currentIndex = 0;
+            currentInspectionData = {};
+            updateInspectionDisplay();
+        }
+
+        function updateInspectionDisplay() {
+            const item = inspectionItems[currentIndex];
+            const progressPercentage = (currentIndex / (inspectionItems.length - 1)) * 100;
+            
+            // Update progress bar
+            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+            
+            // Update icon and name
+            document.getElementById('currentIcon').textContent = item.icon;
+            document.getElementById('currentName').textContent = item.name;
+            
+            const inputContainer = document.getElementById('inputContainer');
+            
+            if (item.isInput) {
+                inputContainer.innerHTML = `
+                    <input 
+                        type="text" 
+                        id="currentInput" 
+                        placeholder="${currentLanguage === 'en' ? 'Enter Vehicle ID' : 'Ingrese ID del Vehículo'}"
+                        value="${currentInspectionData[item.id] || ''}"
+                    >
+                    <div id="validationFeedback" class="validation-feedback"></div>
+                `;
+                
+                const input = document.getElementById('currentInput');
+                input.addEventListener('input', validateInput);
+                validateInput();
+            } else {
+                inputContainer.innerHTML = `
+                    <textarea 
+                        id="currentInput" 
+                        placeholder="${currentLanguage === 'en' ? 'Enter your observations (minimum 30 characters)' : 'Ingrese sus observaciones (mínimo 30 caracteres)'}"
+                    >${currentInspectionData[item.id] || ''}</textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/30
+                    </div>
+                `;
+                
+                const textarea = document.getElementById('currentInput');
+                textarea.addEventListener('input', validateTextArea);
+                validateTextArea();
+            }
+
+            // Navigation button management
+            document.getElementById('prevButton').disabled = currentIndex === 0;
+            document.getElementById('nextButton').textContent = 
+                currentIndex === inspectionItems.length - 1 
+                    ? (currentLanguage === 'en' ? 'Finish' : 'Finalizar')
+                    : (currentLanguage === 'en' ? 'Next' : 'Siguiente');
+        }
+
+        function validateInput() {
+            const input = document.getElementById('currentInput');
+            const validationFeedback = document.getElementById('validationFeedback');
+            const item = inspectionItems[currentIndex];
+            
+            let isValid = true;
+            if (item.validation) {
+                isValid = item.validation(input.value);
+            }
+            
+            document.getElementById('nextButton').disabled = !isValid;
+            
+            validationFeedback.textContent = isValid 
+                ? (currentLanguage === 'en' ? '✅ Valid' : '✅ Válido')
+                : (currentLanguage === 'en' ? '❌ Invalid Format' : '❌ Formato Inválido');
+            validationFeedback.style.color = isValid ? 'green' : 'red';
+        }
+
+        function validateTextArea() {
+            const textarea = document.getElementById('currentInput');
+            const charCount = textarea.value.length;
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('nextButton').disabled = charCount < 30;
+        }
+
+        function nextItem() {
+            // Save current input
+            const currentInput = document.getElementById('currentInput');
+            currentInspectionData[inspectionItems[currentIndex].id] = currentInput.value;
+            
+            // Move to next item
+            if (currentIndex < inspectionItems.length - 1) {
+                currentIndex++;
+                updateInspectionDisplay();
+            } else {
+                // Finish inspection
+                showSignatureModal();
+            }
+        }
+
+        function previousItem() {
+            if (currentIndex > 0) {
+                // Save current input
+                const currentInput = document.getElementById('currentInput');
+                currentInspectionData[inspectionItems[currentIndex].id] = currentInput.value;
+                
+                currentIndex--;
+                updateInspectionDisplay();
+            }
+        }
+
+        function showSignatureModal() {
+            showScreen('signatureModal');
+            initSignatureCanvas();
+        }
+
+        function showScreen(screenId) {
+            // Hide all screens
+            ['loginScreen', 'inspectionScreen', 'recordsScreen', 'signatureModal']
+                .forEach(id => {
+                    const screen = document.getElementById(id);
+                    if (screen) screen.style.display = 'none';
+                });
+            
+            // Show selected screen
+            const selectedScreen = document.getElementById(screenId);
+            if (selectedScreen) {
+                selectedScreen.style.display = 'block';
+            }
+        }
+
+        function startNew() {
+            showScreen('loginScreen');
+            // Reset all necessary states
+            currentIndex = 0;
+            currentInspectionData = {};
+            document.getElementById('workerId').value = '';
+            document.getElementById('workerPassword').value = '';
+        }
+
+        function startDemoMode() {
+            // Populate with a demo worker
+            currentWorker = {
+                name: 'Demo User',
+                inspections: []
+            };
+            showScreen('inspectionScreen');
+            resetInspection();
+        }
+
+        function displayRecords() {
+            const recordsList = document.getElementById('recordsList');
+            const worker = currentWorker;
+
+            if (!worker || worker.inspections.length === 0) {
+                recordsList.innerHTML = `<p>${translations[currentLanguage].noRecords}</p>`;
+                return;
+            }
+
+            recordsList.innerHTML = worker.inspections.map((record, index) => `
+                <div class="record-item">
+                    <div>
+                        <strong>Vehicle ID:</strong> ${record.busId}<br>
+                        <small>${record.date}</small>
+                    </div>
+                    <div>
+                        <button onclick="generatePDFReport(${index})" class="btn btn-secondary">
+                            ${currentLanguage === 'en' ? 'Download Report' : 'Descargar Reporte'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generatePDFReport(index) {
+            try {
+                const record = currentWorker.inspections[index];
+                const doc = new jsPDF();
+                
+                // Create PDF report with all inspection details
+                doc.setFontSize(20);
+                doc.text('FleetGuard Inspection Report', 105, 20, { align: 'center' });
+                
+                // Add inspection details
+                let yOffset = 40;
+                Object.entries(record.details).forEach(([key, value]) => {
+                    doc.text(`${key}: ${value}`, 20, yOffset);
+                    yOffset += 10;
+                });
+
+                doc.save(`FleetGuard_Inspection_${record.busId}.pdf`);
+            } catch (error) {
+                alert(translations[currentLanguage].downloadError);
+                console.error(error);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load saved theme
+            const savedTheme = localStorage.getItem('fleetguard-theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+
+            // Set initial language
+            updateLanguage();
+
+            // Setup event listeners
+            document.getElementById('workerId').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('workerPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+        });
+    </script>
+</body>
+</html>
+        
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 6px;
+            background: var(--primary-color);
+            transition: width 0.5s ease;
+        }
+
+        .title {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .language-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        #loginScreen {
+            display: block;
+        }
+
+        .records-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .record-item {
+            background: #f4f4f4;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --primary-color: #60a5fa;
+            --secondary-color: #34d399;
+            --background-gradient: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            --card-background: #1f2937;
+            --text-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Toggle -->
+    <button class="language-toggle" onclick="toggleLanguage()">
+        <span id="languageToggleBtn">🇺🇸 EN</span>
+    </button>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen container">
+        <div class="card">
+            <h1 class="title">FleetGuard</h1>
+            <div class="input-group">
+                <input type="text" id="workerId" placeholder="Worker ID / ID de Trabajador">
+                <input type="password" id="workerPassword" placeholder="Password / Contraseña">
+            </div>
+            <button class="btn" onclick="login()">
+                <span data-lang="en">Login</span>
+                <span data-lang="es">Iniciar Sesión</span>
+            </button>
+            <button class="btn btn-secondary" onclick="startDemoMode()">
+                <span data-lang="en">Demo Mode</span>
+                <span data-lang="es">Modo Demostración</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Inspection Screen -->
+    <div id="inspectionScreen" class="screen container">
+        <div class="card">
+            <div class="progress-bar" id="progressBar"></div>
+            <div id="workerName" class="title"></div>
+            <div class="status-icon" id="currentIcon"></div>
+            <div id="currentName" class="title"></div>
+            <div id="inputContainer"></div>
+            <div class="nav-buttons">
+                <button class="btn" onclick="previousItem()" id="prevButton">
+                    <span data-lang="en">Previous</span>
+                    <span data-lang="es">Anterior</span>
+                </button>
+                <button class="btn" onclick="nextItem()" id="nextButton">
+                    <span data-lang="en">Next</span>
+                    <span data-lang="es">Siguiente</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Records Screen -->
+    <div id="recordsScreen" class="screen container">
+        <div class="card">
+            <h2 class="title">
+                <span data-lang="en">Inspection History</span>
+                <span data-lang="es">Historial de Inspecciones</span>
+            </h2>
+            <div id="recordsList" class="records-list"></div>
+            <div class="nav-buttons">
+                <button class="btn" onclick="startNew()">
+                    <span data-lang="en">New Inspection</span>
+                    <span data-lang="es">Nueva Inspección</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Signature Modal -->
+    <div id="signatureModal" class="screen container">
+        <div class="card">
+            <h2 class="title">
+                <span data-lang="en">Digital Signature</span>
+                <span data-lang="es">Firma Digital</span>
+            </h2>
+            <canvas id="signatureCanvas" width="400" height="200" style="border: 2px solid #ddd;"></canvas>
+            <div class="nav-buttons">
+                <button class="btn" onclick="clearSignature()">
+                    <span data-lang="en">Clear</span>
+                    <span data-lang="es">Limpiar</span>
+                </button>
+                <button class="btn btn-secondary" onclick="saveSignature()">
+                    <span data-lang="en">Save</span>
+                    <span data-lang="es">Guardar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Multilanguage Support
+        const translations = {
+            en: {
+                invalidWorker: 'Invalid Worker ID or Password',
+                mustCompleteInspection: 'Please complete all inspection fields',
+                downloadError: 'Error generating report',
+                noRecords: 'No inspection records yet'
+            },
+            es: {
+                invalidWorker: 'ID de trabajador o contraseña inválidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspección',
+                downloadError: 'Error al generar el reporte',
+                noRecords: 'Aún no hay registros de inspección'
+            }
+        };
+
+        let currentLanguage = 'es';
+        let currentTheme = 'light';
+
+        // Workers Database (simulated)
+        const workers = {
+            '1234': { 
+                name: 'Juan Pérez', 
+                password: 'fleetguard2024',
+                inspections: [] 
+            },
+            '5678': { 
+                name: 'Maria Rodriguez', 
+                password: 'guardaflota2024',
+                inspections: [] 
+            }
+        };
+
+        // Inspection Configuration
+        const inspectionItems = [
+            { 
+                id: 'bus_id', 
+                name: 'Vehicle Identification / Identificación del Vehículo', 
+                icon: '🚌', 
+                isInput: true,
+                validation: (value) => /^\d{4}$/.test(value)
+            },
+            { 
+                id: 'windshield', 
+                name: 'Windshield / Parabrisas', 
+                icon: '🪟',
+                description: {
+                    en: 'Must be clean, without cracks, chips, or stains obstructing driver\'s view.',
+                    es: 'Debe estar limpio, sin grietas, astillas ni manchas que obstruyan la vista del conductor.'
+                }
+            }
+            // ... (rest of the inspection items remain the same)
+        ];
+
+        // Theme Management
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            localStorage.setItem('fleetguard-theme', currentTheme);
+        }
+
+        // Language Management
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const languageToggleBtn = document.getElementById('languageToggleBtn');
+            languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.getAttribute('data-lang');
+                el.textContent = el.querySelector(`span[data-lang="${currentLanguage}"]`).textContent;
+            });
+        }
+
+        // Login Process
+        function login() {
+            const workerId = document.getElementById('workerId').value.trim();
+            const password = document.getElementById('workerPassword').value;
+
+            const worker = workers[workerId];
+            if (worker && worker.password === password) {
+                currentWorker = worker;
+                document.getElementById('workerName').textContent = `${translations[currentLanguage === 'en' ? 'en' : 'es'].welcome} ${worker.name}`;
+                showScreen('inspectionScreen');
+                resetInspection();
+            } else {
+                alert(translations[currentLanguage].invalidWorker);
+            }
+        }
+
+        // Digital Signature Functionality
+        function initSignatureCanvas() {
+            const canvas = document.getElementById('signatureCanvas');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+            }
+        }
+
+        function clearSignature() {
+            const canvas = document.getElementById('signatureCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveSignature() {
+            const canvas = document.getElementById('signatureCanvas');
+            const signatureImage = canvas.toDataURL('image/png');
+            // In a real app, this would be saved with the inspection record
+            generateFinalReport(signatureImage);
+        }
+
+        // Report Generation with Multiple Formats
+        function generateFinalReport(signatureImage) {
+            // PDF Generation (using jsPDF)
+            const doc = new jsPDF();
+            doc.setFontSize(20);
+            doc.text('FleetGuard Inspection Report', 105, 20, { align: 'center' });
+            
+            // Add signature image
+            if (signatureImage) {
+                doc.addImage(signatureImage, 'PNG', 10, 200, 50, 25);
+            }
+
+            doc.save(`FleetGuard_Inspection_${new Date().toISOString().split('T')[0]}.pdf`);
+
+            // Excel Generation (using SheetJS)
+            const worksheet = XLSX.utils.json_to_sheet(currentInspectionData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inspection");
+            XLSX.writeFile(workbook, `FleetGuard_Inspection_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
