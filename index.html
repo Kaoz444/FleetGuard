@@ -511,26 +511,26 @@
                 recordsContainer.appendChild(recordItem);
             });
         }
-
         function downloadPDF(index) {
+            const { jsPDF } = window.jspdf;  // Acceso correcto al objeto jsPDF
             const record = records[index];
             const doc = new jsPDF();
-
+        
             doc.setFontSize(16);
             doc.text('Inspection Report', 20, 20);
             doc.setFontSize(12);
             doc.text(`Worker: ${record.worker}`, 20, 40);
             doc.text(`Truck ID: ${record.truckId}`, 20, 50);
             doc.text(`Date: ${record.date}`, 20, 60);
-
+        
             let y = 80;
             for (const [key, value] of Object.entries(record.data)) {
                 doc.text(`${key}: ${value}`, 20, y);
                 y += 10;
             }
-
+        
             const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
-       doc.save(`inspection_${record.truckId}_${timestamp}.pdf`);
+            doc.save(`inspection_${record.truckId}_${timestamp}.pdf`);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
