@@ -505,6 +505,7 @@
             const progress = ((currentIndex + 1) / inspectionItems.length) * 100;
             const progressBar = document.getElementById('progressBar');
             progressBar.style.width = `${progress}%`;
+            progressBar.style.position = 'absolute';
             progressBar.style.left = '0';
         }
 
