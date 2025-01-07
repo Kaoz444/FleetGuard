@@ -404,6 +404,7 @@
         function toggleLanguage() {
             currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
             updateLanguage();
+            updateDynamicText(); // Llamada adicional para actualizar textos dinámicos
         }
 
         function showScreen(screenId) {
@@ -412,7 +413,18 @@
             });
             document.getElementById(screenId).style.display = 'block';
         }
-
+        function updateDynamicText() {
+            // Actualizar placeholders de los inputs
+            document.getElementById('workerId').placeholder = currentLanguage === 'en' ? 'Worker ID' : 'ID de Trabajador';
+            document.getElementById('workerPassword').placeholder = currentLanguage === 'en' ? 'Password' : 'Contraseña';
+            document.getElementById('truckId').placeholder = currentLanguage === 'en' ? 'Truck ID' : 'ID del Camión';
+        
+            // Actualizar alertas dinámicas
+            if (currentWorker) {
+                alert(`${translations[currentLanguage].welcome}, ${currentWorker.name}!`);
+            }
+        }
+        
         function login() {
             const workerId = document.getElementById('workerId').value.trim();
             const password = document.getElementById('workerPassword').value.trim();
