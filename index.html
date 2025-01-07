@@ -372,7 +372,7 @@
         function updateLanguage() {
             const languageToggleBtn = document.getElementById('languageToggleBtn');
             if (languageToggleBtn) {
-                languageToggleBtn.textContent = currentLanguage === 'en' ? '馃嚥馃嚱 ES' : '馃嚭馃嚫 EN';
+                languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
             }
 
             document.querySelectorAll('[data-lang]').forEach(el => {
@@ -419,15 +419,15 @@
             showScreen('truckIdScreen');
         }
 
-        function startInspection() {
+         function startInspection() {
             const truckId = document.getElementById('truckId').value.trim();
             if (truckId) {
-                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Cami贸n seleccionado:'} ${truckId}`);
+                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
                 resetInspection();
                 updateInspectionDisplay();
                 showScreen('inspectionScreen');
             } else {
-                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Cami贸n inv谩lido');
+                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
             }
         }
 
@@ -464,7 +464,7 @@
                 currentIndex++;
                 updateInspectionDisplay();
             } else {
-                alert(currentLanguage === 'en' ? 'Inspection completed!' : '隆Inspecci贸n completada!');
+                alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
                 records.push({
                     worker: currentWorker.name,
                     truckId: document.getElementById('truckId').value.trim(),
@@ -527,9 +527,13 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            updateLanguage();
-            toggleTheme();
-        });
+    try {
+        updateLanguage();
+        toggleTheme();
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+});
     </script>
 </body>
 </html>
