@@ -170,6 +170,29 @@
             --card-background: #1f2937;
             --text-color: #f3f4f6;
         }
+
+        .comment-box {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .comment-box textarea {
+            width: 100%;
+            height: 80px;
+            resize: none;
+        }
+
+        .comment-box span {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--text-color);
+        }
+
+        .disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -221,16 +244,18 @@
     <div id="inspectionScreen" class="screen container">
         <div class="card">
             <div class="progress-bar" id="progressBar"></div>
-            <div id="workerName" class="title"></div>
-            <div class="status-icon" id="currentIcon"></div>
             <div id="currentName" class="title"></div>
-            <div id="inputContainer"></div>
+            <div id="currentDescription"></div>
+            <div class="comment-box">
+                <textarea id="commentBox" placeholder="Add comments... / Agrega comentarios..."></textarea>
+                <span id="charCount">0/30</span>
+            </div>
             <div class="nav-buttons">
                 <button class="btn" onclick="previousItem()" id="prevButton">
                     <span data-lang="en">Previous</span>
                     <span data-lang="es">Anterior</span>
                 </button>
-                <button class="btn" onclick="nextItem()" id="nextButton">
+                <button class="btn disabled" onclick="nextItem()" id="nextButton" disabled>
                     <span data-lang="en">Next</span>
                     <span data-lang="es">Siguiente</span>
                 </button>
@@ -262,9 +287,16 @@
         let currentIndex = 0;
         let currentInspectionData = {};
 
+        const inspectionItems = [
+            { id: 'brakes', name: 'Brakes', description: 'Ensure brakes are functional and responsive.' },
+            { id: 'tires', name: 'Tires', description: 'Check for proper inflation and wear.' },
+            { id: 'lights', name: 'Lights', description: 'Ensure all lights are operational and visible.' }
+        ];
+
         const workers = {
             'test1': { id: '001', name: 'Juan Pérez', password: '1234', inspections: [] },
-            'test2': { id: '002', name: 'Maria Rodriguez', password: 'abcd', inspections: [] }
+            'test2': { id: '002', name: 'Maria Rodriguez', password: 'abcd', inspections: [] },
+            '1234': { id: '003', name: 'Worker 1234', password: '1234', inspections: [] }
         };
 
         const trucks = {
@@ -331,8 +363,9 @@
             const truckId = document.getElementById('truckId').value.trim();
             if (trucks[truckId]) {
                 alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${trucks[truckId].model} (${trucks[truckId].year})`);
-                showScreen('inspectionScreen');
                 resetInspection();
+                updateInspectionDisplay();
+                showScreen('inspectionScreen');
             } else {
                 alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
             }
@@ -341,17 +374,51 @@
         function resetInspection() {
             currentIndex = 0;
             currentInspectionData = {};
-            updateInspectionDisplay();
         }
 
         function updateInspectionDisplay() {
-            // Function logic to update the inspection display
+            const currentItem = inspectionItems[currentIndex];
+            document.getElementById('currentName').textContent = currentItem.name;
+            document.getElementById('currentDescription').textContent = currentItem.description;
+            document.getElementById('commentBox').value = '';
+            document.getElementById('charCount').textContent = '0/30';
+            document.getElementById('nextButton').classList.add('disabled');
+            document.getElementById('nextButton').disabled = true;
         }
+
+        document.getElementById('commentBox').addEventListener('input', function () {
+            const charCount = this.value.length;
+            document.getElementById('charCount').textContent = `${charCount}/30`;
+            if (charCount >= 30) {
+                document.getElementById('nextButton').classList.remove('disabled');
+                document.getElementById('nextButton').disabled = false;
+            } else {
+                document.getElementById('nextButton').classList.add('disabled');
+                document.getElementById('nextButton').disabled = true;
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             updateLanguage();
             toggleTheme();
         });
+
+        function nextItem() {
+            if (currentIndex < inspectionItems.length - 1) {
+                currentIndex++;
+                updateInspectionDisplay();
+            } else {
+                alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
+                showScreen('truckIdScreen');
+            }
+        }
+
+        function previousItem() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateInspectionDisplay();
+            }
+        }
     </script>
 </body>
 </html>
