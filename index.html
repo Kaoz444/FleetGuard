@@ -300,6 +300,26 @@
     </div>
 
     <script>
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('inspectionProgress');
+            if (savedProgress) {
+                const progressData = JSON.parse(savedProgress);
+                currentIndex = progressData.currentIndex;
+                currentInspectionData = progressData.currentInspectionData;
+                updateInspectionDisplay();
+                updateProgressBar();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                updateLanguage();
+                toggleTheme();
+                loadProgress(); // Cargar el progreso guardado al iniciar
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
         const translations = {
             en: {
                 invalidWorker: 'Invalid Worker ID or Password',
@@ -518,7 +538,13 @@
                 document.getElementById('nextButton').disabled = true;
             }
         }
-
+        function saveProgress() {
+            const progressData = {
+                currentIndex: currentIndex,
+                currentInspectionData: currentInspectionData
+            };
+            localStorage.setItem('inspectionProgress', JSON.stringify(progressData));
+        }
         function updateProgressBar() {
             const progress = ((currentIndex + 1) / inspectionItems.length) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
@@ -537,29 +563,32 @@
         });
 
         function nextItem() {
-                    currentInspectionData[inspectionItems[currentIndex].id] = document.getElementById('commentBox').value;
-                    if (currentIndex < inspectionItems.length - 1) {
-                        currentIndex++;
-                        updateInspectionDisplay();
-                        updateProgressBar();
-                    } else {
-                        alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
-                        records.push({
-                            worker: currentWorker.name,
-                            truckId: document.getElementById('truckId').value.trim(),
-                            date: new Date().toLocaleString(),
-                            data: { ...currentInspectionData }
-                        });
-                        showScreen('recordsScreen');
-                        displayRecords();
-                    }
-                }
+            currentInspectionData[inspectionItems[currentIndex].id] = document.getElementById('commentBox').value;
+            if (currentIndex < inspectionItems.length - 1) {
+                currentIndex++;
+                updateInspectionDisplay();
+                updateProgressBar();
+                saveProgress(); // Guardar el progreso
+            } else {
+                alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
+                records.push({
+                    worker: currentWorker.name,
+                    truckId: document.getElementById('truckId').value.trim(),
+                    date: new Date().toLocaleString(),
+                    data: { ...currentInspectionData }
+                });
+                localStorage.removeItem('inspectionProgress'); // Eliminar el progreso al finalizar
+                showScreen('recordsScreen');
+                displayRecords();
+            }
+        }
 
         function previousItem() {
             if (currentIndex > 0) {
                 currentIndex--;
                 updateInspectionDisplay();
                 updateProgressBar();
+                saveProgress(); // Guardar el progreso
             }
         }
 
