@@ -635,6 +635,15 @@
             '1234': { id: '003', name: 'Juan Ramon', password: '1234', inspections: [] },
             'admin': { id: '001', name: 'Admin User', password: 'admin', inspections: [] }
         };
+	// Truck data
+	const trucks = {
+	    'T001': { id: 'T001', model: 'Kenworth T680', year: 2020, driver: 'Carlos Perez' },
+	    'T002': { id: 'T002', model: 'Freightliner Cascadia', year: 2019, driver: 'Ana Lopez' },
+	    'T003': { id: 'T003', model: 'Volvo VNL 760', year: 2021, driver: 'Luis Martinez' },
+	    'T004': { id: 'T004', model: 'International LT625', year: 2018, driver: 'Sofia Ramirez' },
+	    'T005': { id: 'T005', model: 'Peterbilt 579', year: 2022, driver: 'Miguel Hernandez' }
+	};
+
 
         // Records array
         const records = [];
@@ -724,10 +733,13 @@
 	    showScreen('truckIdScreen');
 	}
 
-	 function startInspection() {
+	function startInspection() {
 	    const truckId = document.getElementById('truckId').value.trim();
-	    if (truckId) {
-	        showNotification(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
+	    
+	    if (trucks[truckId]) {
+	        const truck = trucks[truckId];
+	        showNotification(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truck.model}, ${truck.year}`);
+	        
 	        resetInspection();
 	        updateInspectionDisplay();
 	        updateProgressBar();
@@ -736,6 +748,7 @@
 	        showNotification(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
 	    }
 	}
+
 
         function resetInspection() {
             currentIndex = 0;
