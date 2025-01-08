@@ -640,25 +640,19 @@
 
         // Core functions
 
-	function updateLanguage() {
-    const languageToggleBtn = document.getElementById('languageToggleBtn');
-    if (languageToggleBtn) {
-        languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
-    }
+        function updateLanguage() {
+            const languageToggleBtn = document.getElementById('languageToggleBtn');
+            if (languageToggleBtn) {
+                languageToggleBtn.textContent = currentLanguage === 'en' ? '馃嚥馃嚱 ES' : '馃嚭馃嚫 EN';
+            }
 
-    // Mostrar solo el texto del idioma seleccionado
-    document.querySelectorAll('[data-lang]').forEach(el => {
-        el.classList.remove('active');
-        if (el.getAttribute('data-lang') === currentLanguage) {
-            el.classList.add('active');
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const translation = el.querySelector(`span[data-lang="${currentLanguage}"]`);
+                if (translation) {
+                    el.textContent = translation.textContent;
+                }
+            });
         }
-    });
-
-    // Actualizar los textos dinámicos en la pantalla de inspección
-    if (document.getElementById('inspectionScreen').style.display === 'block') {
-        updateInspectionDisplay(); // Actualizar la pantalla actual sin borrar el contenido escrito
-    }
-}
 	function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
             document.getElementById('currentName').textContent = ${item.icon} ${item.name[currentLanguage]};
