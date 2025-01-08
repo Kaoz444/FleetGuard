@@ -10,8 +10,42 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-	    /* Add these responsive styles to your existing CSS */
 
+	.nav-buttons {
+	    display: flex;
+	    flex-direction: column-reverse; /* This will put Next on top */
+	    gap: 10px;
+	}
+	
+	/* Custom notification styles */
+	.custom-notification {
+	    position: fixed;
+	    top: 20px;
+	    left: 50%;
+	    transform: translateX(-50%);
+	    background: var(--primary-color);
+	    color: white;
+	    padding: 12px 24px;
+	    border-radius: 8px;
+	    z-index: 1000;
+	    opacity: 0;
+	    transition: opacity 0.3s ease;
+	    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	    font-size: 16px;
+	    text-align: center;
+	}
+	
+	.custom-notification.show {
+	    opacity: 1;
+	}
+
+@media screen and (max-width: 480px) {
+    .custom-notification {
+        width: 90%;
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+}
 /* Base responsive adjustments */
 @media screen and (max-width: 768px) {
     .container {
@@ -374,6 +408,7 @@
     </style>
 </head>
 <body>
+	<div id="customNotification" class="custom-notification"></div>
     <!-- Language Toggle -->
     <button class="language-toggle" onclick="toggleLanguage()">
         <span id="languageToggleBtn">ES EN</span>
@@ -480,6 +515,16 @@
         let currentIndex = 0;
         let currentInspectionData = {};
         let currentItemStatus = null;
+
+	function showNotification(message, duration = 3000) {
+	    const notification = document.getElementById('customNotification');
+	    notification.textContent = message;
+	    notification.classList.add('show');
+	    
+	    setTimeout(() => {
+	        notification.classList.remove('show');
+	    }, duration);
+	}
 
         // Inspection items data
         const inspectionItems = [
@@ -636,36 +681,38 @@
                 currentLanguage === 'en' ? 'Truck ID' : 'ID del Camión';
         }
 
-        function login() {
-            const workerId = document.getElementById('workerId').value.trim();
-            const password = document.getElementById('workerPassword').value.trim();
+	function login() {
+	    const workerId = document.getElementById('workerId').value.trim();
+	    const password = document.getElementById('workerPassword').value.trim();
+	
+	    if (workers[workerId] && workers[workerId].password === password) {
+	        currentWorker = workers[workerId];
+	        showNotification(`${translations[currentLanguage].welcome}, ${currentWorker.name}!`);
+	        showScreen('truckIdScreen');
+	    } else {
+	        showNotification(translations[currentLanguage].invalidWorker);
+	    }
+	}
+		
 
-            if (workers[workerId] && workers[workerId].password === password) {
-                currentWorker = workers[workerId];
-                alert(`${translations[currentLanguage].welcome}, ${currentWorker.name}!`);
-                showScreen('truckIdScreen');
-            } else {
-                alert(translations[currentLanguage].invalidWorker);
-            }
-        }
+	function startDemoMode() {
+	    currentWorker = { id: '000', name: 'Demo User', inspections: [] };
+	    showNotification(`${translations[currentLanguage].welcome}, Demo User!`);
+	    showScreen('truckIdScreen');
+	}
 
-        function startDemoMode() {
-            currentWorker = { id: '000', name: 'Demo User', inspections: [] };
-            showScreen('truckIdScreen');
-        }
-
-        function startInspection() {
-            const truckId = document.getElementById('truckId').value.trim();
-            if (truckId) {
-                alert(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
-                resetInspection();
-                updateInspectionDisplay();
-                updateProgressBar();
-                showScreen('inspectionScreen');
-            } else {
-                alert(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
-            }
-        }
+	 function startInspection() {
+	    const truckId = document.getElementById('truckId').value.trim();
+	    if (truckId) {
+	        showNotification(`${currentLanguage === 'en' ? 'Truck selected:' : 'Camión seleccionado:'} ${truckId}`);
+	        resetInspection();
+	        updateInspectionDisplay();
+	        updateProgressBar();
+	        showScreen('inspectionScreen');
+	    } else {
+	        showNotification(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
+	    }
+	}
 
         function resetInspection() {
             currentIndex = 0;
