@@ -514,15 +514,13 @@
 
         function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
-            
-            // Guardar el texto actual de la caja de comentarios
-            const currentText = document.getElementById('commentBox').value;
         
             // Actualizar el nombre y la descripción en el idioma actual
             document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
             document.getElementById('currentDescription').textContent = item.description[currentLanguage];
         
-            // Restaurar el texto previamente guardado
+            // Cargar el texto guardado para el ítem actual, o dejar vacío si no hay texto
+            const currentText = currentInspectionData[item.id] || '';
             document.getElementById('commentBox').value = currentText;
         
             // Actualizar el contador de caracteres
@@ -538,6 +536,7 @@
                 document.getElementById('nextButton').disabled = true;
             }
         }
+
         function saveProgress() {
             const progressData = {
                 currentIndex: currentIndex,
