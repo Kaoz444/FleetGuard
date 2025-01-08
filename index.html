@@ -713,6 +713,25 @@
 	        showNotification(currentLanguage === 'en' ? 'Invalid Truck ID' : 'ID de Camión inválido');
 	    }
 	}
+	function updateLanguage() {
+    const languageToggleBtn = document.getElementById('languageToggleBtn');
+    if (languageToggleBtn) {
+        languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+    }
+
+    // Mostrar solo el texto del idioma seleccionado
+    document.querySelectorAll('[data-lang]').forEach(el => {
+        el.classList.remove('active');
+        if (el.getAttribute('data-lang') === currentLanguage) {
+            el.classList.add('active');
+        }
+    });
+
+    // Actualizar los textos dinámicos en la pantalla de inspección
+    if (document.getElementById('inspectionScreen').style.display === 'block') {
+        updateInspectionDisplay(); // Actualizar la pantalla actual sin borrar el contenido escrito
+    }
+}
 
         function resetInspection() {
             currentIndex = 0;
