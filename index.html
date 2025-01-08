@@ -639,20 +639,53 @@
         const records = [];
 
         // Core functions
-        function updateLanguage() {
-            const languageToggleBtn = document.getElementById('languageToggleBtn');
-            if (languageToggleBtn) {
-                languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
-            }
 
-            document.querySelectorAll('[data-lang]').forEach(el => {
-                el.classList.remove('active');
-                if (el.getAttribute('data-lang') === currentLanguage) {
-                    el.classList.add('active');
-                }
-            });
+	function updateLanguage() {
+    const languageToggleBtn = document.getElementById('languageToggleBtn');
+    if (languageToggleBtn) {
+        languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
+    }
+
+    // Mostrar solo el texto del idioma seleccionado
+    document.querySelectorAll('[data-lang]').forEach(el => {
+        el.classList.remove('active');
+        if (el.getAttribute('data-lang') === currentLanguage) {
+            el.classList.add('active');
         }
+    });
 
+    // Actualizar los textos dinámicos en la pantalla de inspección
+    if (document.getElementById('inspectionScreen').style.display === 'block') {
+        updateInspectionDisplay(); // Actualizar la pantalla actual sin borrar el contenido escrito
+    }
+}
+	function updateInspectionDisplay() {
+            const item = inspectionItems[currentIndex];
+            document.getElementById('currentName').textContent = ${item.icon} ${item.name[currentLanguage]};
+            document.getElementById('currentDescription').textContent = item.description[currentLanguage];
+            
+            // Reset status buttons
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Load saved data if exists
+            const savedData = currentInspectionData[item.id];
+            if (typeof savedData === 'object' && savedData !== null) {
+                document.getElementById('commentBox').value = savedData.comment || '';
+                if (savedData.status) {
+                    const statusBtn = document.querySelector(.status-btn[data-status="${savedData.status}"]);
+                    if (statusBtn) {
+                        statusBtn.classList.add('active');
+                        currentItemStatus = savedData.status;
+                    }
+                }
+            } else {
+                document.getElementById('commentBox').value = savedData || '';
+            }
+            
+            updateCharCount();
+        }
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
             currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
@@ -739,25 +772,7 @@
             currentItemStatus = null;
         }
 		
-function updateLanguage() {
-    const languageToggleBtn = document.getElementById('languageToggleBtn');
-    if (languageToggleBtn) {
-        languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
-    }
 
-    // Mostrar solo el texto del idioma seleccionado
-    document.querySelectorAll('[data-lang]').forEach(el => {
-        el.classList.remove('active');
-        if (el.getAttribute('data-lang') === currentLanguage) {
-            el.classList.add('active');
-        }
-    });
-
-    // Actualizar los textos dinámicos en la pantalla de inspección
-    if (document.getElementById('inspectionScreen').style.display === 'block') {
-        updateInspectionDisplay(); // Actualizar la pantalla actual sin borrar el contenido escrito
-    }
-}
 
 
         function updateProgressBar() {
