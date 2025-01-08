@@ -59,7 +59,6 @@
             background: var(--primary-color);
             transition: width 0.5s ease;
             margin-bottom: 20px;
-            width: 100%;
         }
 
         .progress-container {
@@ -69,8 +68,9 @@
             border-radius: 3px;
             overflow: hidden;
             margin-bottom: 20px;
-            position: relative; /* Se añade esta línea */
+            position: relative;
         }
+
         .title {
             color: var(--primary-color);
             font-size: 28px;
@@ -115,28 +115,6 @@
             background: var(--secondary-color);
         }
 
-        .status-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        .language-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .language-btn {
-            background: none;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
         .screen {
             display: none;
         }
@@ -145,31 +123,88 @@
             display: block;
         }
 
-        .records-list {
-            max-height: 300px;
-            overflow-y: auto;
+        /* New status styles */
+        .status-selector {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
         }
 
+        .status-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .status-ok {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .status-critical {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Enhanced record item styles */
         .record-item {
-            background: #f4f4f4;
+            background: #f8f9fa;
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--text-color-dark);
+        }
+
+        .record-metadata {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .record-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        /* Dark theme adjustments */
+        body.dark-theme {
+            --card-background: #1f2937;
+            --text-color: #f3f4f6;
         }
 
         body.dark-theme .record-item {
-            background: #2d2d2d;
-            color: #ffffff;
+            background: #374151;
         }
 
-        .theme-toggle {
+        [data-lang] {
+            display: none;
+        }
+
+        [data-lang].active {
+            display: inline;
+        }
+
+        /* Theme and language toggles */
+        .theme-toggle, .language-toggle {
             position: absolute;
-            top: 15px;
-            left: 15px;
             background: none;
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
@@ -178,42 +213,14 @@
             font-size: 12px;
         }
 
-        /* Dark Theme */
-        body.dark-theme {
-            --primary-color: #60a5fa;
-            --secondary-color: #34d399;
-            --background-gradient: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            --card-background: #1f2937;
-            --text-color: #f3f4f6;
+        .theme-toggle {
+            top: 15px;
+            left: 15px;
         }
 
-        .comment-box {
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        .comment-box textarea {
-            width: 100%;
-            height: 80px;
-            resize: none;
-        }
-
-        .comment-box span {
-            display: block;
-            margin-top: 5px;
-            font-size: 12px;
-            color: var(--text-color);
-        }
-
-        .disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        [data-lang] {
-            display: none;
-        }
-        [data-lang].active {
-            display: inline;
+        .language-toggle {
+            top: 15px;
+            right: 15px;
         }
     </style>
 </head>
@@ -262,7 +269,7 @@
         </div>
     </div>
 
-    <!-- Inspection Screen -->
+    <!-- Enhanced Inspection Screen -->
     <div id="inspectionScreen" class="screen container">
         <div class="card">
             <div class="progress-container">
@@ -270,10 +277,28 @@
             </div>
             <div id="currentName" class="title"></div>
             <div id="currentDescription"></div>
+
+            <!-- Status selector -->
+            <div class="status-selector">
+                <button class="status-btn status-ok" data-status="ok">
+                    <span data-lang="en">OK</span>
+                    <span data-lang="es">OK</span>
+                </button>
+                <button class="status-btn status-warning" data-status="warning">
+                    <span data-lang="en">Warning</span>
+                    <span data-lang="es">Precaución</span>
+                </button>
+                <button class="status-btn status-critical" data-status="critical">
+                    <span data-lang="en">Critical</span>
+                    <span data-lang="es">Crítico</span>
+                </button>
+            </div>
+
             <div class="comment-box">
                 <textarea id="commentBox" placeholder="Add comments... / Agrega comentarios..."></textarea>
                 <span id="charCount">0/30</span>
             </div>
+
             <div class="nav-buttons">
                 <button class="btn" onclick="previousItem()" id="prevButton">
                     <span data-lang="en">Previous</span>
@@ -298,51 +323,16 @@
             </button>
         </div>
     </div>
-
-    <script>
-        function loadProgress() {
-            const savedProgress = localStorage.getItem('inspectionProgress');
-            if (savedProgress) {
-                const progressData = JSON.parse(savedProgress);
-                currentIndex = progressData.currentIndex;
-                currentInspectionData = progressData.currentInspectionData;
-                updateInspectionDisplay();
-                updateProgressBar();
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                updateLanguage();
-                toggleTheme();
-                loadProgress(); // Cargar el progreso guardado al iniciar
-            } catch (error) {
-                console.error('Error during initialization:', error);
-            }
-        });
-        const translations = {
-            en: {
-                invalidWorker: 'Invalid Worker ID or Password',
-                mustCompleteInspection: 'Please complete all inspection fields',
-                downloadError: 'Error generating report',
-                noRecords: 'No inspection records yet',
-                welcome: 'Welcome'
-            },
-            es: {
-                invalidWorker: 'ID de trabajador o contrasena invalidos',
-                mustCompleteInspection: 'Por favor complete todos los campos de inspeccion',
-                downloadError: 'Error al generar el reporte',
-                noRecords: 'Aun no hay registros de inspeccion',
-                welcome: 'Bienvenido'
-            }
-        };
-
+	<script>
+        // Core variables
         let currentLanguage = 'es';
         let currentTheme = 'light';
         let currentWorker = null;
         let currentIndex = 0;
         let currentInspectionData = {};
+        let currentItemStatus = null;
 
+        // Inspection items data
         const inspectionItems = [
             { 
                 id: 'windshield', 
@@ -427,20 +417,40 @@
             }
         ];
 
+        // Translations
+        const translations = {
+            en: {
+                invalidWorker: 'Invalid Worker ID or Password',
+                mustCompleteInspection: 'Please complete all inspection fields',
+                downloadError: 'Error generating report',
+                noRecords: 'No inspection records yet',
+                welcome: 'Welcome'
+            },
+            es: {
+                invalidWorker: 'ID de trabajador o contrasena invalidos',
+                mustCompleteInspection: 'Por favor complete todos los campos de inspeccion',
+                downloadError: 'Error al generar el reporte',
+                noRecords: 'Aun no hay registros de inspeccion',
+                welcome: 'Bienvenido'
+            }
+        };
+
+        // Worker data
         const workers = {
             '1234': { id: '003', name: 'Juan Ramon', password: '1234', inspections: [] },
             'admin': { id: '001', name: 'Admin User', password: 'admin', inspections: [] }
         };
 
+        // Records array
         const records = [];
 
+        // Core functions
         function updateLanguage() {
             const languageToggleBtn = document.getElementById('languageToggleBtn');
             if (languageToggleBtn) {
                 languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
             }
-        
-            // Mostrar solo el texto del idioma seleccionado
+
             document.querySelectorAll('[data-lang]').forEach(el => {
                 el.classList.remove('active');
                 if (el.getAttribute('data-lang') === currentLanguage) {
@@ -448,19 +458,17 @@
                 }
             });
         }
-        
 
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
             currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
-            localStorage.setItem('fleetguard-theme', currentTheme);
         }
 
         function toggleLanguage() {
             currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
             updateLanguage();
             updateDynamicText();
-            updateInspectionDisplay(); // Actualizar la pantalla de inspección
+            updateInspectionDisplay();
         }
 
         function showScreen(screenId) {
@@ -469,13 +477,16 @@
             });
             document.getElementById(screenId).style.display = 'block';
         }
+
         function updateDynamicText() {
-            // Actualizar placeholders de los inputs
-            document.getElementById('workerId').placeholder = currentLanguage === 'en' ? 'Worker ID' : 'ID de Trabajador';
-            document.getElementById('workerPassword').placeholder = currentLanguage === 'en' ? 'Password' : 'Contraseña';
-            document.getElementById('truckId').placeholder = currentLanguage === 'en' ? 'Truck ID' : 'ID del Camión';
+            document.getElementById('workerId').placeholder = 
+                currentLanguage === 'en' ? 'Worker ID' : 'ID de Trabajador';
+            document.getElementById('workerPassword').placeholder = 
+                currentLanguage === 'en' ? 'Password' : 'Contraseña';
+            document.getElementById('truckId').placeholder = 
+                currentLanguage === 'en' ? 'Truck ID' : 'ID del Camión';
         }
-        
+
         function login() {
             const workerId = document.getElementById('workerId').value.trim();
             const password = document.getElementById('workerPassword').value.trim();
@@ -510,76 +521,63 @@
         function resetInspection() {
             currentIndex = 0;
             currentInspectionData = {};
+            currentItemStatus = null;
         }
-
-        function updateInspectionDisplay() {
+		
+		function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
-        
-            // Actualizar el nombre y la descripción en el idioma actual
             document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
             document.getElementById('currentDescription').textContent = item.description[currentLanguage];
-        
-            // Cargar el texto guardado para el ítem actual, o dejar vacío si no hay texto
-            const currentText = currentInspectionData[item.id] || '';
-            document.getElementById('commentBox').value = currentText;
-        
-            // Actualizar el contador de caracteres
-            const charCount = currentText.length;
-            document.getElementById('charCount').textContent = `${charCount}/30`;
-        
-            // Deshabilitar o habilitar el botón "Next" según el conteo de caracteres
-            if (charCount >= 30) {
-                document.getElementById('nextButton').classList.remove('disabled');
-                document.getElementById('nextButton').disabled = false;
+            
+            // Reset status buttons
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Load saved data if exists
+            const savedData = currentInspectionData[item.id];
+            if (typeof savedData === 'object' && savedData !== null) {
+                document.getElementById('commentBox').value = savedData.comment || '';
+                if (savedData.status) {
+                    const statusBtn = document.querySelector(`.status-btn[data-status="${savedData.status}"]`);
+                    if (statusBtn) {
+                        statusBtn.classList.add('active');
+                        currentItemStatus = savedData.status;
+                    }
+                }
             } else {
-                document.getElementById('nextButton').classList.add('disabled');
-                document.getElementById('nextButton').disabled = true;
+                document.getElementById('commentBox').value = savedData || '';
             }
+            
+            updateCharCount();
         }
 
-        function saveProgress() {
-            const progressData = {
-                currentIndex: currentIndex,
-                currentInspectionData: currentInspectionData
-            };
-            localStorage.setItem('inspectionProgress', JSON.stringify(progressData));
-        }
         function updateProgressBar() {
             const progress = ((currentIndex + 1) / inspectionItems.length) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
         }
 
-        document.getElementById('commentBox').addEventListener('input', function () {
-            const charCount = this.value.length;
+        function updateCharCount() {
+            const charCount = document.getElementById('commentBox').value.length;
             document.getElementById('charCount').textContent = `${charCount}/30`;
-            if (charCount >= 30) {
-                document.getElementById('nextButton').classList.remove('disabled');
-                document.getElementById('nextButton').disabled = false;
+            
+            const nextButton = document.getElementById('nextButton');
+            if (charCount >= 30 && currentItemStatus) {
+                nextButton.classList.remove('disabled');
+                nextButton.disabled = false;
             } else {
-                document.getElementById('nextButton').classList.add('disabled');
-                document.getElementById('nextButton').disabled = true;
+                nextButton.classList.add('disabled');
+                nextButton.disabled = true;
             }
-        });
+        }
 
-        function nextItem() {
-            currentInspectionData[inspectionItems[currentIndex].id] = document.getElementById('commentBox').value;
-            if (currentIndex < inspectionItems.length - 1) {
-                currentIndex++;
-                updateInspectionDisplay();
-                updateProgressBar();
-                saveProgress(); // Guardar el progreso
-            } else {
-                alert(currentLanguage === 'en' ? 'Inspection completed!' : '¡Inspección completada!');
-                records.push({
-                    worker: currentWorker.name,
-                    truckId: document.getElementById('truckId').value.trim(),
-                    date: new Date().toLocaleString(),
-                    data: { ...currentInspectionData }
-                });
-                localStorage.removeItem('inspectionProgress'); // Eliminar el progreso al finalizar
-                showScreen('recordsScreen');
-                displayRecords();
-            }
+        function setItemStatus(status) {
+            currentItemStatus = status;
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.status-btn').classList.add('active');
+            updateCharCount(); // Check if we can enable the next button
         }
 
         function previousItem() {
@@ -587,16 +585,37 @@
                 currentIndex--;
                 updateInspectionDisplay();
                 updateProgressBar();
-                saveProgress(); // Guardar el progreso
             }
         }
 
-        function updateProgressBar() {
-            const progress = ((currentIndex + 1) / inspectionItems.length) * 100;
-            const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = `${progress}%`;
-            progressBar.style.position = 'absolute';
-            progressBar.style.left = '0';
+        function nextItem() {
+            const item = inspectionItems[currentIndex];
+            currentInspectionData[item.id] = {
+                comment: document.getElementById('commentBox').value,
+                status: currentItemStatus,
+                timestamp: new Date().toISOString()
+            };
+
+            if (currentIndex < inspectionItems.length - 1) {
+                currentIndex++;
+                updateInspectionDisplay();
+                updateProgressBar();
+                currentItemStatus = null; // Reset status for next item
+            } else {
+                completeInspection();
+            }
+        }
+
+        function completeInspection() {
+            const truckId = document.getElementById('truckId').value.trim();
+            records.push({
+                worker: currentWorker.name,
+                truckId: truckId,
+                date: new Date().toLocaleString(),
+                data: { ...currentInspectionData }
+            });
+            showScreen('recordsScreen');
+            displayRecords();
         }
 
         function displayRecords() {
@@ -611,77 +630,122 @@
             records.forEach((record, index) => {
                 const recordItem = document.createElement('div');
                 recordItem.className = 'record-item';
+                
+                // Count critical and warning items
+                let criticalCount = 0;
+                let warningCount = 0;
+                Object.values(record.data).forEach(item => {
+                    if (item.status === 'critical') criticalCount++;
+                    if (item.status === 'warning') warningCount++;
+                });
+
                 recordItem.innerHTML = `
                     <div>
                         <p><strong>${record.worker}</strong></p>
                         <p>${record.truckId} - ${record.date}</p>
+                        <div class="record-metadata">
+                            ${criticalCount > 0 ? `<span class="record-status status-critical">
+                                ${criticalCount} Critical</span>` : ''}
+                            ${warningCount > 0 ? `<span class="record-status status-warning">
+                                ${warningCount} Warning</span>` : ''}
+                        </div>
                     </div>
                     <button class="btn" onclick="downloadPDF(${index})">PDF</button>
                 `;
                 recordsContainer.appendChild(recordItem);
             });
         }
-function downloadPDF(index) {
+
+        function downloadPDF(index) {
             const { jsPDF } = window.jspdf;
             const record = records[index];
             const doc = new jsPDF();
             
-            const marginLeft = 20;
-            const marginTop = 20;
-            const lineHeight = 10;
-            const pageWidth = doc.internal.pageSize.getWidth() - marginLeft * 2;
+            // Header
+            doc.setFillColor(59, 130, 246);
+            doc.rect(0, 0, doc.internal.pageSize.getWidth(), 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.text('FleetGuard Inspection Report', 20, 20);
             
-            doc.setFontSize(16);
-            doc.text('Inspection Report', marginLeft, marginTop);
+            // Reset text color
+            doc.setTextColor(0, 0, 0);
+            
+            // Metadata
+            let y = 40;
             doc.setFontSize(12);
-        
-            let y = marginTop + 20;
-            const textLines = [
-                `Worker: ${record.worker}`,
-                `Truck ID: ${record.truckId}`,
-                `Date: ${record.date}`
-            ];
+            doc.text(`Inspector: ${record.worker}`, 20, y);
+            doc.text(`Vehicle ID: ${record.truckId}`, 20, y + 10);
+            doc.text(`Date: ${record.date}`, 20, y + 20);
             
-            textLines.forEach(line => {
-                doc.text(line, marginLeft, y);
-                y += lineHeight;
-            });
-        
-            y += lineHeight;  // Espacio adicional antes de los datos de inspección
-        
-            for (const [key, value] of Object.entries(record.data)) {
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(14);
-                doc.text(`${key}:`, marginLeft, y);
-                y += lineHeight;
-        
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(12);
-                const lines = doc.splitTextToSize(`${value}`, pageWidth);
-                lines.forEach(line => {
-                    if (y + lineHeight > doc.internal.pageSize.getHeight() - marginTop) {
-                        doc.addPage();
-                        y = marginTop;
+            y += 40;
+            
+            // Inspection items with status
+            Object.entries(record.data).forEach(([key, value]) => {
+                const item = inspectionItems.find(i => i.id === key);
+                if (item) {
+                    // Set color based on status
+                    const statusColors = {
+                        ok: [16, 185, 129],
+                        warning: [245, 158, 11],
+                        critical: [239, 68, 68]
+                    };
+					
+					doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${item.name[currentLanguage]}`, 20, y);
+                    
+                    if (value.status && statusColors[value.status]) {
+                        const color = statusColors[value.status];
+                        doc.setTextColor(...color);
+                        doc.text(`[${value.status.toUpperCase()}]`, 120, y);
+                        doc.setTextColor(0, 0, 0);
                     }
-                    doc.text(line, marginLeft, y);
-                    y += lineHeight;
-                });
-                y += 5;  // Espacio adicional entre ítems
-            }
-        
+                    
+                    y += 10;
+                    
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`${value.comment}`, 20, y);
+                    
+                    y += 20;
+                    
+                    if (y > doc.internal.pageSize.getHeight() - 20) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                }
+            });
+            
+            // Add footer with timestamp
             const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
-            doc.save(`Inspection_Camion${record.truckId}_Fecha${timestamp}.pdf`);
+            doc.setFontSize(10);
+            doc.setTextColor(128, 128, 128);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 20, doc.internal.pageSize.getHeight() - 10);
+            
+            doc.save(`FleetGuard_Inspection_${record.truckId}_${timestamp}.pdf`);
         }
 
-
+        // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-    try {
-        updateLanguage();
-        toggleTheme();
-    } catch (error) {
-        console.error('Error during initialization:', error);
-    }
-});
+            try {
+                // Initialize language
+                updateLanguage();
+                
+                // Initialize status buttons
+                document.querySelectorAll('.status-btn').forEach(btn => {
+                    btn.addEventListener('click', () => setItemStatus(btn.dataset.status));
+                });
+                
+                // Initialize comment box character counter
+                const commentBox = document.getElementById('commentBox');
+                if (commentBox) {
+                    commentBox.addEventListener('input', updateCharCount);
+                }
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
     </script>
 </body>
 </html>
