@@ -425,14 +425,15 @@
                 <input type="text" id="workerId" placeholder="Worker ID / ID de Trabajador">
                 <input type="password" id="workerPassword" placeholder="Password / Contrasena">
             </div>
-            <button class="btn" onclick="login()">
-                <span data-lang="en">Login</span>
-                <span data-lang="es">Iniciar Sesion</span>
-            </button>
-            <button class="btn btn-secondary" onclick="startDemoMode()">
-                <span data-lang="en">Demo Mode</span>
-                <span data-lang="es">Modo Demostracion</span>
-            </button>
+		<button class="btn" onclick="login()">
+		    <span data-lang="en">Login</span>
+		    <span data-lang="es" style="display: none;">Iniciar Sesión</span>
+		</button>
+		
+		<button class="btn btn-secondary" onclick="startDemoMode()">
+		    <span data-lang="en">Demo Mode</span>
+		    <span data-lang="es" style="display: none;">Modo Demostración</span>
+		</button>
         </div>
     </div>
 
@@ -641,18 +642,15 @@
         // Core functions
 
         function updateLanguage() {
-            const languageToggleBtn = document.getElementById('languageToggleBtn');
-            if (languageToggleBtn) {
-                languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
-            }
+    const languageToggleBtn = document.getElementById('languageToggleBtn');
+    languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
 
-            document.querySelectorAll('[data-lang]').forEach(el => {
-                el.classList.remove('active');
-                if (el.getAttribute('data-lang') === currentLanguage) {
-                    el.classList.add('active');
-                }
-            });
-        }
+    // Actualizar todos los elementos con atributo data-lang
+    document.querySelectorAll('[data-lang]').forEach(el => {
+        el.style.display = el.getAttribute('data-lang') === currentLanguage ? 'inline' : 'none';
+    });
+}
+
 	function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
             document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
