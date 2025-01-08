@@ -863,75 +863,88 @@
             });
         }
 
-        function downloadPDF(index) {
-            const { jsPDF } = window.jspdf;
-            const record = records[index];
-            const doc = new jsPDF();
-            
-            // Header
-            doc.setFillColor(59, 130, 246);
-            doc.rect(0, 0, doc.internal.pageSize.getWidth(), 30, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(20);
-            doc.text('FleetGuard Inspection Report', 20, 20);
-            
-            // Reset text color
-            doc.setTextColor(0, 0, 0);
-            
-            // Metadata
-            let y = 40;
-            doc.setFontSize(12);
-            doc.text(`Inspector: ${record.worker}`, 20, y);
-            doc.text(`Vehicle ID: ${record.truckId}`, 20, y + 10);
-            doc.text(`Date: ${record.date}`, 20, y + 20);
-            
-            y += 40;
-            
-            // Inspection items with status
-            Object.entries(record.data).forEach(([key, value]) => {
-                const item = inspectionItems.find(i => i.id === key);
-                if (item) {
-                    // Set color based on status
-                    const statusColors = {
-                        ok: [16, 185, 129],
-                        warning: [245, 158, 11],
-                        critical: [239, 68, 68]
-                    };
-					
-					doc.setFontSize(14);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${item.name[currentLanguage]}`, 20, y);
-                    
-                    if (value.status && statusColors[value.status]) {
-                        const color = statusColors[value.status];
-                        doc.setTextColor(...color);
-                        doc.text(`[${value.status.toUpperCase()}]`, 120, y);
-                        doc.setTextColor(0, 0, 0);
-                    }
-                    
-                    y += 10;
-                    
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text(`${value.comment}`, 20, y);
-                    
-                    y += 20;
-                    
-                    if (y > doc.internal.pageSize.getHeight() - 20) {
-                        doc.addPage();
-                        y = 20;
-                    }
-                }
-            });
-            
-            // Add footer with timestamp
-            const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
-            doc.setFontSize(10);
-            doc.setTextColor(128, 128, 128);
-            doc.text(`Generated: ${new Date().toLocaleString()}`, 20, doc.internal.pageSize.getHeight() - 10);
-            
-            doc.save(`FleetGuard_Inspection_${record.truckId}_${timestamp}.pdf`);
-        }
+	function downloadPDF(index) {
+	    const { jsPDF } = window.jspdf;
+	    const record = records[index];
+	    const doc = new jsPDF();
+	
+	    // Obtener información del camión
+	    const truck = trucks[record.truckId];
+	
+	    // Header
+	    doc.setFillColor(59, 130, 246);
+	    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 30, 'F');
+	    doc.setTextColor(255, 255, 255);
+	    doc.setFontSize(20);
+	    doc.text('FleetGuard Inspection Report', 20, 20);
+	
+	    // Reset text color
+	    doc.setTextColor(0, 0, 0);
+	
+	    // Metadata
+	    let y = 40;
+	    doc.setFontSize(12);
+	    doc.text(`Inspector: ${record.worker}`, 20, y);
+	    doc.text(`Vehicle ID: ${record.truckId}`, 20, y + 10);
+	    
+	    if (truck) {
+	        doc.text(`Model: ${truck.model}`, 20, y + 20);
+	        doc.text(`Year: ${truck.year}`, 20, y + 30);
+	        y += 40;
+	    } else {
+	        y += 20;
+	    }
+	
+	    doc.text(`Date: ${record.date}`, 20, y);
+	
+	    y += 20;
+	
+	    // Inspection items with status
+	    Object.entries(record.data).forEach(([key, value]) => {
+	        const item = inspectionItems.find(i => i.id === key);
+	        if (item) {
+	            // Set color based on status
+	            const statusColors = {
+	                ok: [16, 185, 129],
+	                warning: [245, 158, 11],
+	                critical: [239, 68, 68]
+	            };
+	
+	            doc.setFontSize(14);
+	            doc.setFont('helvetica', 'bold');
+	            doc.text(`${item.name[currentLanguage]}`, 20, y);
+	
+	            if (value.status && statusColors[value.status]) {
+	                const color = statusColors[value.status];
+	                doc.setTextColor(...color);
+	                doc.text(`[${value.status.toUpperCase()}]`, 120, y);
+	                doc.setTextColor(0, 0, 0);
+	            }
+	
+	            y += 10;
+	
+	            doc.setFontSize(12);
+	            doc.setFont('helvetica', 'normal');
+	            doc.text(`${value.comment}`, 20, y);
+	
+	            y += 20;
+	
+	            if (y > doc.internal.pageSize.getHeight() - 20) {
+	                doc.addPage();
+	                y = 20;
+	            }
+	        }
+	    });
+	
+	    // Add footer with timestamp
+	    const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
+	    doc.setFontSize(10);
+	    doc.setTextColor(128, 128, 128);
+	    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, doc.internal.pageSize.getHeight() - 10);
+	
+	    doc.save(`FleetGuard_Inspection_${record.truckId}_${timestamp}.pdf`);
+	}
+
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
