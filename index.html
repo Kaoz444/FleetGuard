@@ -643,19 +643,19 @@
         function updateLanguage() {
             const languageToggleBtn = document.getElementById('languageToggleBtn');
             if (languageToggleBtn) {
-                languageToggleBtn.textContent = currentLanguage === 'en' ? '馃嚥馃嚱 ES' : '馃嚭馃嚫 EN';
+                languageToggleBtn.textContent = currentLanguage === 'en' ? '🇲🇽 ES' : '🇺🇸 EN';
             }
 
             document.querySelectorAll('[data-lang]').forEach(el => {
-                const translation = el.querySelector(`span[data-lang="${currentLanguage}"]`);
-                if (translation) {
-                    el.textContent = translation.textContent;
+                el.classList.remove('active');
+                if (el.getAttribute('data-lang') === currentLanguage) {
+                    el.classList.add('active');
                 }
             });
         }
 	function updateInspectionDisplay() {
             const item = inspectionItems[currentIndex];
-            document.getElementById('currentName').textContent = ${item.icon} ${item.name[currentLanguage]};
+            document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
             document.getElementById('currentDescription').textContent = item.description[currentLanguage];
             
             // Reset status buttons
