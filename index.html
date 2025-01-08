@@ -4,8 +4,157 @@
     <title>FleetGuard - Inspeccion de Vehiculos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3b82f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
+	    /* Add these responsive styles to your existing CSS */
+
+/* Base responsive adjustments */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+        width: 100%;
+    }
+
+    .card {
+        padding: 20px 15px;
+    }
+
+    .title {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    input, textarea, select {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+    .nav-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .status-selector {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .status-btn {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .record-item {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .record-item .btn {
+        width: 100%;
+    }
+
+    /* Adjust theme and language toggles for mobile */
+    .theme-toggle, .language-toggle {
+        top: 10px;
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .theme-toggle {
+        left: 10px;
+    }
+
+    .language-toggle {
+        right: 10px;
+    }
+
+    /* Adjust progress bar for mobile */
+    .progress-container {
+        height: 4px;
+        margin-bottom: 15px;
+    }
+
+    .progress-bar {
+        height: 4px;
+    }
+
+    /* Make text more readable on mobile */
+    #currentDescription {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    /* Adjust comment box for mobile */
+    .comment-box textarea {
+        min-height: 80px;
+    }
+
+    #charCount {
+        font-size: 12px;
+    }
+}
+
+/* Landscape mode adjustments */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+    .container {
+        padding: 5px;
+    }
+
+    .card {
+        padding: 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* Compact view for landscape */
+    .title {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .input-group {
+        margin-bottom: 10px;
+    }
+
+    .nav-buttons {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    /* Adjust spacing for landscape */
+    .status-selector {
+        margin: 10px 0;
+    }
+
+    .comment-box {
+        margin: 10px 0;
+    }
+}
+
+/* Print media query for PDF generation */
+@media print {
+    .card {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .btn, .theme-toggle, .language-toggle {
+        display: none;
+    }
+}
         :root {
             --primary-color: #3b82f6;
             --secondary-color: #10b981;
