@@ -652,32 +652,30 @@
 }
 
 	function updateInspectionDisplay() {
-            const item = inspectionItems[currentIndex];
-            document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
-            document.getElementById('currentDescription').textContent = item.description[currentLanguage];
-            
-            // Reset status buttons
-            document.querySelectorAll('.status-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+	    const item = inspectionItems[currentIndex];
+	
+	    // Actualizar el nombre y la descripción en el idioma actual
+	    document.getElementById('currentName').textContent = `${item.icon} ${item.name[currentLanguage]}`;
+	    document.getElementById('currentDescription').textContent = item.description[currentLanguage];
+	
+	    // Cargar el texto guardado para el ítem actual, o dejar vacío si no hay texto
+	    const currentText = currentInspectionData[item.id] || '';
+	    document.getElementById('commentBox').value = currentText;
+	
+	    // Actualizar el contador de caracteres
+	    const charCount = currentText.length;
+	    document.getElementById('charCount').textContent = `${charCount}/30`;
+	
+	    // Deshabilitar o habilitar el botón "Next" según el conteo de caracteres
+	    if (charCount >= 30) {
+	        document.getElementById('nextButton').classList.remove('disabled');
+	        document.getElementById('nextButton').disabled = false;
+	    } else {
+	        document.getElementById('nextButton').classList.add('disabled');
+	        document.getElementById('nextButton').disabled = true;
+	    }
+	}
 
-            // Load saved data if exists
-            const savedData = currentInspectionData[item.id];
-            if (typeof savedData === 'object' && savedData !== null) {
-                document.getElementById('commentBox').value = savedData.comment || '';
-                if (savedData.status) {
-                    const statusBtn = document.querySelector(.status-btn[data-status="${savedData.status}"]);
-                    if (statusBtn) {
-                        statusBtn.classList.add('active');
-                        currentItemStatus = savedData.status;
-                    }
-                }
-            } else {
-                document.getElementById('commentBox').value = savedData || '';
-            }
-            
-            updateCharCount();
-        }
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
             currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
