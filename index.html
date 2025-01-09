@@ -509,6 +509,88 @@
         </div>
     </div>
 	<script>
+
+//new testing code to erase
+		function showAdminDashboard() {
+    updateAdminStats();
+    updateRecentInspections();
+    showScreen('adminScreen');
+}
+
+function updateAdminStats() {
+    // Update total inspections
+    document.getElementById('totalInspections').textContent = records.length;
+
+    // Count critical issues
+    const criticalCount = records.reduce((count, record) => {
+        const hasCritical = Object.values(record.data).some(item => item.status === 'critical');
+        return count + (hasCritical ? 1 : 0);
+    }, 0);
+    document.getElementById('criticalIssues').textContent = criticalCount;
+
+    // Count unique active vehicles
+    const uniqueVehicles = new Set(records.map(record => record.truckId)).size;
+    document.getElementById('activeVehicles').textContent = uniqueVehicles;
+}
+
+function updateRecentInspections() {
+    const tableBody = document.getElementById('recentInspectionsTable');
+    tableBody.innerHTML = '';
+
+    // Get last 5 inspections
+    const recentInspections = records.slice(-5).reverse();
+
+    recentInspections.forEach(inspection => {
+        const row = document.createElement('tr');
+        
+        // Calculate overall status
+        const hasCritical = Object.values(inspection.data).some(item => item.status === 'critical');
+        const hasWarning = Object.values(inspection.data).some(item => item.status === 'warning');
+        const status = hasCritical ? 'Critical' : hasWarning ? 'Warning' : 'OK';
+        const statusColor = hasCritical ? '#ef4444' : hasWarning ? '#f59e0b' : '#10b981';
+
+        row.innerHTML = `
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inspection.date}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inspection.worker}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inspection.truckId}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                <span style="color: ${statusColor}; font-weight: bold;">${status}</span>
+            </td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                <button class="btn" onclick="viewInspectionDetails('${inspection.truckId}')" 
+                    style="padding: 5px 10px; font-size: 12px;">
+                    View Details
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function viewInspectionDetails(truckId) {
+    // Find the inspection
+    const inspection = records.find(r => r.truckId === truckId);
+    if (!inspection) return;
+
+    // Create a formatted message
+    let message = `Inspection Details for ${truckId}\n`;
+    message += `Inspector: ${inspection.worker}\n`;
+    message += `Date: ${inspection.date}\n\n`;
+
+    // Add inspection items
+    Object.entries(inspection.data).forEach(([key, value]) => {
+        const item = inspectionItems.find(i => i.id === key);
+        if (item) {
+            message += `${item.name[currentLanguage]}: ${value.status.toUpperCase()}\n`;
+            message += `Comment: ${value.comment}\n\n`;
+        }
+    });
+
+    alert(message);
+}
+
+//new testing code to erase finishes
+		
         // Core variables
         let currentLanguage = 'es';
         let currentTheme = 'light';
@@ -717,7 +799,27 @@
                 currentLanguage === 'en' ? 'Truck ID' : 'ID del Camión';
         }
 
-	function login() {
+//improved login function
+		function login() {
+    const workerId = document.getElementById('workerId').value.trim();
+    const password = document.getElementById('workerPassword').value.trim();
+
+    if (workers[workerId] && workers[workerId].password === password) {
+        currentWorker = workers[workerId];
+        showNotification(`${translations[currentLanguage].welcome}, ${currentWorker.name}!`);
+        
+        // Check if user is admin
+        if (workerId === 'admin') {
+            showAdminDashboard();
+        } else {
+            showScreen('truckIdScreen');
+        }
+    } else {
+        showNotification(translations[currentLanguage].invalidWorker);
+    }
+}
+		//original login function
+	/*function login() {
 	    const workerId = document.getElementById('workerId').value.trim();
 	    const password = document.getElementById('workerPassword').value.trim();
 	
@@ -728,7 +830,7 @@
 	    } else {
 	        showNotification(translations[currentLanguage].invalidWorker);
 	    }
-	}
+	}*/
 		
 
 	function startDemoMode() {
@@ -971,5 +1073,57 @@
             }
         });
     </script>
+	<!-- Admin Dashboard Screen -->
+<div id="adminScreen" class="screen container">
+    <div class="card">
+        <h2 class="title">Admin Dashboard</h2>
+        
+        <!-- Stats Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div class="stat-card" style="background: #f0f9ff; padding: 15px; border-radius: 8px;">
+                <h3 style="color: #3b82f6; margin: 0;">Total Inspections</h3>
+                <p id="totalInspections" style="font-size: 24px; font-weight: bold; margin: 10px 0;">0</p>
+            </div>
+            
+            <div class="stat-card" style="background: #fff7ed; padding: 15px; border-radius: 8px;">
+                <h3 style="color: #f97316; margin: 0;">Critical Issues</h3>
+                <p id="criticalIssues" style="font-size: 24px; font-weight: bold; margin: 10px 0;">0</p>
+            </div>
+            
+            <div class="stat-card" style="background: #f0fdf4; padding: 15px; border-radius: 8px;">
+                <h3 style="color: #22c55e; margin: 0;">Active Vehicles</h3>
+                <p id="activeVehicles" style="font-size: 24px; font-weight: bold; margin: 10px 0;">0</p>
+            </div>
+        </div>
+
+        <!-- Recent Inspections Table -->
+        <div style="margin-top: 20px;">
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Recent Inspections</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--primary-color); color: white;">
+                            <th style="padding: 10px; text-align: left;">Date</th>
+                            <th style="padding: 10px; text-align: left;">Inspector</th>
+                            <th style="padding: 10px; text-align: left;">Vehicle</th>
+                            <th style="padding: 10px; text-align: left;">Status</th>
+                            <th style="padding: 10px; text-align: left;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentInspectionsTable">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <button class="btn" onclick="showScreen('loginScreen')" style="margin-top: 20px;">
+            Back to Login
+        </button>
+    </div>
+</div>
+
+	
 </body>
 </html>
